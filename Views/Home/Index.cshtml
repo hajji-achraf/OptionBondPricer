@@ -1,0 +1,1186 @@
+﻿@{
+    ViewData["Title"] = "Accueil";
+    Layout = null;
+    string lastUpdated = "2025-04-29 18:22:30";
+    string userName = "hajji-achraf";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Achraf Hajji - Développeur spécialisé en finance quantitative et outils de pricing" />
+    <title>@ViewData["Title"] - Pricing Tools</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" />
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --primary-color: #e0e0e0;
+            --secondary-color: #6b46c1;
+            --tertiary-color: #f97316;
+            --quaternary-color: #10b981;
+            --text-color: #333;
+            --text-secondary: #666;
+            --light-gray: #f5f5f5;
+            --gray: #e0e0e0;
+            --dark-gray: #888;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.2s ease;
+        }
+
+        .dark-theme {
+            --background-color: #121212;
+            --text-color: #e5e5e5;
+            --text-secondary: #aaa;
+            --light-gray: #1e1e1e;
+            --gray: #2d2d2d;
+            --dark-gray: #aaa;
+        }
+
+        *, *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            min-height: 100vh;
+            scroll-behavior: smooth;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ANIMATIONS D'ARRIÈRE-PLAN AMÉLIORÉES ET PLUS VISIBLES */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -10;
+            overflow: hidden;
+        }
+
+        /* Cercles colorés visibles */
+        .animated-circle {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.2;
+            z-index: -9;
+        }
+
+        .circle1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #6b46c1 0%, transparent 70%);
+            top: -200px;
+            left: -100px;
+            animation: floatCircle1 25s infinite alternate ease-in-out;
+        }
+
+        .circle2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #10b981 0%, transparent 70%);
+            bottom: -100px;
+            right: -100px;
+            animation: floatCircle2 20s infinite alternate ease-in-out;
+        }
+
+        .circle3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #f97316 0%, transparent 70%);
+            top: 40%;
+            left: 60%;
+            animation: floatCircle3 15s infinite alternate ease-in-out;
+        }
+
+        @@keyframes floatCircle1 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(100px, 100px); }
+        }
+
+        @@keyframes floatCircle2 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100px, -50px); }
+        }
+
+        @@keyframes floatCircle3 {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-50px, 50px); }
+        }
+
+        /* Lignes diagonales animées */
+        .diagonal-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(
+                45deg,
+                rgba(107, 70, 193, 0.03) 0px,
+                rgba(107, 70, 193, 0.03) 1px,
+                transparent 1px,
+                transparent 30px
+            );
+            opacity: 1;
+            z-index: -8;
+            animation: moveDiagonal 25s linear infinite;
+        }
+
+        @@keyframes moveDiagonal {
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 100px; }
+        }
+
+        /* Points animés */
+        .animated-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 10px 10px, rgba(107, 70, 193, 0.15) 2px, transparent 0),
+                radial-gradient(circle at 30px 30px, rgba(16, 185, 129, 0.1) 2px, transparent 0);
+            background-size: 40px 40px;
+            z-index: -7;
+            opacity: 0.7;
+            animation: moveDots 20s linear infinite;
+        }
+        
+        @@keyframes moveDots {
+            0% { background-position: 0 0, 0 0; }
+            100% { background-position: 40px 40px, 40px 40px; }
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--light-gray);
+            border: none;
+            border-radius: 50%;
+            padding: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Hero Section - Nouvelle version similaire à l'image */
+        .hero-section {
+            min-height: calc(100vh - 100px);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        @@media (min-width: 992px) {
+            .hero-section {
+                grid-template-columns: 1.2fr 0.8fr;
+                align-items: center;
+            }
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 600px;
+        }
+
+        /* Nouvelle animation d'écriture-effacement pour le nom */
+        .hero-name {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 900; /* Extra bold pour le nom */
+            margin: 0;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 0.15em solid var(--secondary-color);
+            animation: typing 3s steps(12) infinite;
+            display: inline-block;
+            width: max-content;
+            color: var(--text-color);
+        }
+
+        @@keyframes typing {
+            0%, 100% { width: 0 }
+            20%, 80% { width: 100% }
+            90%, 95% { width: 0 }
+        }
+
+        .hero-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 800; /* Extra bold pour la spécialité */
+            margin: 0.5rem 0 1.5rem;
+            color: var(--secondary-color);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards 0.2s;
+        }
+
+        .hero-description {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards 0.4s;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards 0.6s;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--text-color);
+            color: var(--background-color);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--gray);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--light-gray);
+            transform: translateY(-3px);
+        }
+
+        .hero-social {
+            display: flex;
+            gap: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards 0.8s;
+        }
+
+        .social-icon {
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .social-icon:hover {
+            color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        .profile-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .profile-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 5px solid var(--background-color);
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: scale(0.8);
+            animation: fadeInScale 1s ease forwards 0.5s;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* EFFET VISIBLE d'halo autour de la photo de profil */
+        .profile-halo {
+            position: absolute;
+            width: 100%;
+            max-width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            background: conic-gradient(
+                #6b46c1, 
+                #10b981, 
+                #f97316, 
+                #6b46c1
+            );
+            opacity: 0.3;
+            z-index: 0;
+            animation: rotateHalo 10s linear infinite;
+        }
+
+        @@keyframes rotateHalo {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Tools Section */
+        .section-heading {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-heading::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background-color: var(--secondary-color);
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
+        }
+
+        .tools-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin: 3rem auto;
+            max-width: 800px;
+        }
+
+        @@media (min-width: 768px) {
+            .tools-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .tool-card {
+            background-color: var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid var(--gray);
+            transition: var(--transition), opacity 0.8s ease, transform 0.8s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Effet de brillance amélioré sur les cartes */
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(45deg);
+            transition: all 0.8s ease;
+        }
+
+        .tool-card:hover::before {
+            top: 100%;
+            left: 100%;
+        }
+
+        .tool-card.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .option-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .obligation-card:hover {
+            border-color: var(--secondary-color);
+        }
+
+        .card-content svg {
+            margin-bottom: 1rem;
+            stroke: var(--primary-color);
+            transition: transform 0.3s ease;
+        }
+
+        .tool-card:hover .card-content svg {
+            transform: scale(1.1);
+        }
+
+        .obligation-card .card-content svg {
+            stroke: var(--secondary-color);
+        }
+
+        .card-content h2 {
+            margin: 0 0 0.5rem;
+            font-size: 1.375rem;
+            font-weight: 600;
+        }
+
+        .card-content p {
+            margin: 0;
+            color: var(--dark-gray);
+            font-size: 1rem;
+        }
+
+        /* SECTION DE CONTACT PLEIN ÉCRAN */
+        .contact-section {
+            min-height: 100vh;
+            background-color: var(--light-gray);
+            padding: 0;
+            margin: 4rem 0 0 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Vagues animées en arrière-plan de la section contact */
+        .waves {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+        }
+
+        .wave1 {
+            bottom: 0;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%236b46c1' fill-opacity='0.3'%3E%3C/path%3E%3C/svg%3E");
+            background-size: 1200px 100px;
+            animation: wave 25s linear infinite;
+        }
+
+        .wave2 {
+            bottom: 20px;
+            height: 80px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' fill='%2310b981' fill-opacity='0.3'%3E%3C/path%3E%3C/svg%3E");
+            background-size: 1200px 80px;
+            animation: wave 20s linear reverse infinite;
+        }
+
+        @@keyframes wave {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .contact-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: fadeInUp 0.8s ease forwards 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        @@media (min-width: 992px) {
+            .contact-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 4rem;
+            }
+        }
+
+        .contact-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .contact-heading {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-text {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .contact-item:hover {
+            transform: translateX(5px);
+        }
+
+        .contact-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: var(--background-color);
+            color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .contact-item:hover .contact-icon {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .contact-form-container {
+            background-color: var(--background-color);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Bordure animée pour le formulaire */
+        .contact-form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #6b46c1, #10b981, #f97316, #6b46c1);
+            background-size: 200% 100%;
+            animation: borderGradient 5s linear infinite;
+        }
+
+        @@keyframes borderGradient {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-input, 
+        .form-textarea {
+            padding: 1rem;
+            border: 1px solid var(--gray);
+            border-radius: 8px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-input:focus, 
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(107, 70, 193, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--text-color);
+            color: var(--background-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Effet de brillance pour le bouton */
+        .submit-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            animation: buttonSweep 3s infinite;
+        }
+
+        @@keyframes buttonSweep {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .dark-theme .submit-button {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid var(--gray);
+        }
+
+        .copyright {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--dark-gray);
+        }
+
+        .last-updated {
+            font-size: 0.75rem;
+            color: var(--dark-gray);
+            margin-top: 0.5rem;
+        }
+
+        /* Scroll to top button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            background-color: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .scroll-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .down-arrow {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        @@keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Style pour les icônes sociales centrées dans le footer */
+        .footer-social-centered {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem auto;
+            padding: 1rem 0;
+        }
+
+        .footer-social-centered .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+            transition: var(--transition);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--light-gray);
+            border: 1px solid var(--gray);
+        }
+
+        .footer-social-centered .social-link:hover {
+            color: var(--secondary-color);
+            transform: translateY(-5px);
+            background-color: var(--background-color);
+            box-shadow: var(--shadow);
+        }
+
+        .last-updated {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Animations d'arrière-plan plus visibles -->
+    <div class="animated-bg">
+        <div class="animated-circle circle1"></div>
+        <div class="animated-circle circle2"></div>
+        <div class="animated-circle circle3"></div>
+        <div class="diagonal-lines"></div>
+        <div class="animated-dots"></div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle theme">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+
+    <div class="container">
+        <!-- Hero Section inspiré par l'image de référence -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <!-- Nom avec effet d'écriture-effacement -->
+                <h1 class="hero-name">Achraf Hajji</h1>
+                <!-- Titre en gras -->
+                <h2 class="hero-title">Développeur Finance Quantitative</h2>
+                <p class="hero-description">
+                    Passionné par la finance quantitative et la modélisation, je conçois des outils d'analyse et de valorisation tout en approfondissant mes compétences à travers des projets appliqués.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#tools" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        Voir mes outils
+                    </a>
+                    <a href="#contact" class="btn btn-outline">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        Me contacter
+                    </a>
+                </div>
+                <div class="hero-social">
+                    <a href="https://github.com/hajji-achraf" target="_blank" rel="noopener" class="social-icon" aria-label="GitHub profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                        </svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/achraf-hajji-a271ab241/" target="_blank" rel="noopener" class="social-icon" aria-label="LinkedIn profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                            <rect x="2" y="9" width="4" height="12"></rect>
+                            <circle cx="4" cy="4" r="2"></circle>
+                        </svg>
+                    </a>
+                    <a href="mailto:achraf.hajji.45@edu.uiz.ac.ma" class="social-icon" aria-label="Email contact">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            <div class="profile-image-container">
+                <div class="profile-halo"></div>
+                <img src="/images/hajji.jpg" alt="Photo de profil d'Achraf Hajji" class="profile-image" loading="lazy">
+            </div>
+            <a href="#tools" class="down-arrow" aria-label="Scroll down">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7 13l5 5 5-5M7 6l5 5 5-5"/>
+                </svg>
+            </a>
+        </section>
+        
+        <!-- Outils Section -->
+        <section id="tools" class="section-tools">
+            <h2 class="section-heading">Mes Outils</h2>
+            <div class="tools-container">
+                <a href="@Url.Action("Index", "Option")" class="tool-card option-card">
+                    <div class="card-content">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
+                            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
+                            <line x1="6" y1="1" x2="6" y2="4"></line>
+                            <line x1="10" y1="1" x2="10" y2="4"></line>
+                            <line x1="14" y1="1" x2="14" y2="4"></line>
+                        </svg>
+                        <h2>Pricing Options</h2>
+                        <p>Calculer la valeur des options avec différents modèles</p>
+                    </div>
+                </a>
+
+                <a href="@Url.Action("Index", "Obligation")" class="tool-card obligation-card">
+                    <div class="card-content">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                        </svg>
+                        <h2>Pricing Obligations</h2>
+                        <p>Évaluez les obligations et calculez les rendements</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </div>
+
+    <!-- SECTION DE CONTACT PLEIN ÉCRAN -->
+    <section id="contact" class="contact-section">
+        <!-- Vagues animées -->
+        <div class="waves">
+            <div class="wave wave1"></div>
+            <div class="wave wave2"></div>
+        </div>
+        
+        <h2 class="contact-title">Contact Me</h2>
+        
+        <div class="contact-container">
+            <div class="contact-left">
+                <h3 class="contact-heading">Get in Touch</h3>
+                <p class="contact-text">
+                    Je suis toujours ouvert à de nouvelles opportunités et collaborations. N'hésitez pas à me contacter pour discuter de votre projet !
+                </p>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <span>achraf.hajji.45@edu.uiz.ac.ma</span>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <span>+212 608031144</span>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <span>Agadir, Maroc</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-form-container">
+                <form id="contact-form">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Nom</label>
+                        <input type="text" id="name" class="form-input" placeholder="Votre nom" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" id="email" class="form-input" placeholder="votre.email@example.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message" class="form-label">Message</label>
+                        <textarea id="message" class="form-textarea" placeholder="Votre message ici..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-button">Envoyer Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <!-- Structure du footer modifiée avec les icônes centrées -->
+        <div class="footer-info">
+            <div class="footer-copyright">
+                <p>© 2025 Achraf Hajji. Tous droits réservés.</p>
+            </div>
+
+            <div class="footer-social-centered">
+                <a href="https://github.com/hajji-achraf" class="social-link" aria-label="GitHub">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+                    </svg>
+                </a>
+                <a href="https://www.linkedin.com/in/achraf-hajji-a271ab241/" class="social-link" aria-label="LinkedIn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                        <rect x="2" y="9" width="4" height="12"></rect>
+                        <circle cx="4" cy="4" r="2"></circle>
+                    </svg>
+                </a>
+                <a href="mailto:achraf.hajji.45@edu.uiz.ac.ma" class="social-link" aria-label="Email">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                </a>
+            </div>
+
+            <div class="last-updated">
+                <p>Dernière mise à jour: @lastUpdated | @userName</p>
+            </div>
+        </div>
+    </footer>
+
+    <button class="scroll-to-top" id="scrollTop" aria-label="Retour en haut">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme Toggle
+            const themeToggle = document.querySelector('.theme-toggle');
+            const body = document.body;
+
+            // Initialize theme from localStorage
+            if (localStorage.getItem('theme') === 'dark') {
+                body.classList.add('dark-theme');
+                updateThemeIcon();
+            }
+
+            // Event listener for theme toggle
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-theme');
+                localStorage.setItem('theme', body.classList.contains('dark-theme') ? 'dark' : 'light');
+                updateThemeIcon();
+            });
+
+            function updateThemeIcon() {
+                const isDark = body.classList.contains('dark-theme');
+                themeToggle.innerHTML = isDark 
+                    ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>'
+                    : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+            }
+
+            // Intersection Observer for animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // Elements to observe
+            document.querySelectorAll('.tool-card').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Scroll to Top button
+            const scrollTop = document.getElementById('scrollTop');
+            
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    scrollTop.classList.add('active');
+                } else {
+                    scrollTop.classList.remove('active');
+                }
+            });
+            
+            scrollTop.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    
+                    if (targetElement) {
+                        e.preventDefault();
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 20,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Form validation
+            const form = document.getElementById('contact-form');
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const name = form.querySelector('#name').value.trim();
+                const email = form.querySelector('#email').value.trim();
+                const message = form.querySelector('#message').value.trim();
+                
+                
+                
+                if (name && emailRegex.test(email) && message) {
+                    alert('Message envoyé avec succès !');
+                    form.reset();
+                } else {
+                    if (!name) {
+                        alert('Veuillez entrer votre nom.');
+                    } else if (!emailRegex.test(email)) {
+                        alert('Veuillez entrer une adresse email valide.');
+                    } else {
+                        alert('Veuillez remplir tous les champs correctement.');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

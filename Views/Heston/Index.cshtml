@@ -1,0 +1,2107 @@
+﻿@model App.Models.HestonViewModel
+@{
+    ViewData["Title"] = "Heston Option Pricer";
+    Layout = null;
+    string currentDateTime = "2025-05-01 08:34:47";
+    string currentUser = "hajji-achraf";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --primary-color: #e0e0e0;
+            --secondary-color: #6b46c1;
+            --tertiary-color: #f97316;
+            --quaternary-color: #10b981;
+            --text-color: #333;
+            --text-secondary: #666;
+            --light-gray: #f5f5f5;
+            --gray: #e0e0e0;
+            --dark-gray: #888;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.2s ease;
+            --bs-primary: #6b46c1;
+            --bs-primary-rgb: 107, 70, 193;
+            --bs-secondary: #10b981;
+            --bs-secondary-rgb: 16, 185, 129;
+            --bs-dark: #333;
+            --surface-color: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Animation du titre avec effet d'écriture-effacement */
+        .app-title {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--bs-primary);
+            display: inline-flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            padding-left: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 0.15em solid var(--secondary-color);
+            animation: typing 5s steps(30) infinite;
+            width: max-content;
+        }
+
+        @@keyframes typing {
+            0%, 100% {
+                width: 0
+            }
+
+            20%, 80% {
+                width: 100%
+            }
+
+            90%, 95% {
+                width: 0
+            }
+        }
+
+        .app-title i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: var(--surface-color);
+            padding: 0.75rem 1rem;
+            font-weight: 800; /* Plus gras pour le titre */
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 1rem;
+            background-color: var(--surface-color);
+        }
+
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-secondary {
+            background-color: var(--bs-secondary);
+            border-color: var(--bs-secondary);
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background-color: #27ae60;
+            border-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0.6rem 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--bs-primary);
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            background-color: var(--surface-color);
+            transition: var(--transition);
+        }
+
+        .chart-container:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .price-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .price-display:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .price-label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .price-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .price-value.semi-analytical {
+            background-color: var(--bs-primary);
+        }
+
+        .price-value.montecarlo {
+            background-color: var(--bs-secondary);
+        }
+
+        .price-value.finitediff {
+            background-color: #1abc9c;
+        }
+
+        .price-value.market {
+            background-color: var(--bs-dark);
+        }
+
+        .greek-card {
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            height: 100%;
+        }
+
+        .greek-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .greek-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .greek-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--bs-primary);
+        }
+
+        .greek-description {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .dark-mode .loading-overlay {
+            background-color: rgba(26,37,48,0.8);
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .spinner-text {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: var(--text-color);
+            border-bottom: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--bs-primary);
+            background-color: transparent;
+            border-bottom-color: var(--bs-primary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(15deg);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+        }
+
+        .badge.bg-primary {
+            background-color: var(--bs-primary) !important;
+        }
+
+        .badge.bg-success {
+            background-color: var(--bs-secondary) !important;
+        }
+
+        #plot3d {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow);
+        }
+
+        .update-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background-color: #f1f5f9;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+        .update-badge .icon {
+            font-size: 1rem;
+            color: var(--bs-primary);
+        }
+
+        .update-badge .user {
+            font-weight: 500;
+            color: var(--bs-primary);
+        }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            border-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .footer {
+            background-color: var(--surface-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+            color: var(--text-color);
+            margin-top: 1rem;
+        }
+
+        /* Styles pour la version unifiée */
+        .unified-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @@media (max-width: 992px) {
+            .unified-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .unified-results {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .search-panel, .options-panel, .param-panel, .results-panel {
+            transition: all 0.3s ease;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--bs-primary);
+            font-size: 1.1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 0.5rem;
+        }
+
+        .collapsed-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-left: 0.5rem;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .collapse-btn:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+
+        .card.collapsed .card-body {
+            display: none;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        .form-row {
+            margin-bottom: 0.75rem;
+        }
+
+        .info-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--bs-primary);
+        }
+
+        .nodata-message {
+            padding: 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .nodata-message i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+        .selected-option-row {
+            background-color: rgba(52, 152, 219, 0.1) !important;
+        }
+
+        .option-row {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-row:hover {
+            background-color: rgba(52, 152, 219, 0.05);
+        }
+
+        .btn-calculate {
+            transition: all 0.3s ease;
+            transform-origin: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-calculate:active {
+            transform: scale(0.95);
+        }
+
+        /* Animation du bouton de calcul */
+        .btn-calculate::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient( 90deg, transparent, rgba(255, 255, 255, 0.3), transparent );
+            animation: buttonSweep 3s infinite;
+        }
+
+        @@keyframes buttonSweep {
+            0% {
+                left: -100%;
+            }
+
+            50% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Styles spécifiques pour le modèle de Heston */
+        .heston-params {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-left: 3px solid var(--bs-primary);
+        }
+
+        .param-slider {
+            margin: 0.5rem 0;
+        }
+
+        .param-slider .form-range {
+            width: 100%;
+        }
+
+        .param-slider .d-flex {
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .param-info {
+            cursor: help;
+            margin-left: 0.25rem;
+            color: #6c757d;
+        }
+
+        .tooltip-inner {
+            max-width: 250px;
+            background-color: rgba(33, 37, 41, 0.9);
+            text-align: left;
+        }
+
+        .model-switch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .model-switch .form-check {
+            margin: 0;
+        }
+
+        .model-switch .form-check-label {
+            cursor: pointer;
+        }
+
+        /* Badge pour le modèle actuel */
+        .model-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--bs-primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+            z-index: 10;
+        }
+
+        /* Animation pour les surfaces */
+        .surface-toggle-btn {
+            margin-right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.85rem;
+            border-radius: 20px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+
+        .surface-toggle-btn:hover, .surface-toggle-btn.active {
+            background-color: var(--bs-primary);
+            color: white;
+            border-color: var(--bs-primary);
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Overlay de chargement -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--bs-primary);" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-text" id="loadingText">Chargement...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Titre de l'application avec animation d'écriture-effacement -->
+        <div class="app-title">
+            <i class="bi bi-graph-up"></i>
+            Heston Option Pricer - Modèle à Volatilité Stochastique
+        </div>
+
+        <div id="error-message" class="alert alert-danger mb-3" style="display:none;"></div>
+
+        <main role="main" class="pb-2">
+            <!-- Interface unifiée -->
+            <div class="unified-container">
+                <!-- Panneau de gauche -->
+                <div class="left-panel">
+                    <!-- Section recherche de ticker -->
+                    <div class="card search-panel mb-3">
+                        <div class="card-header">
+                            <div class="section-title"><i class="bi bi-search"></i> Recherche de Ticker</div>
+                            <button class="collapse-btn" data-target="search-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="search-body">
+                            <form id="search-form" class="mb-3">
+                                <div class="form-group mb-2">
+                                    <label for="ticker-input" class="form-label">Entrez le ticker du sous-jacent :</label>
+                                    <div class="input-group">
+                                        <input type="text" id="ticker-input" class="form-control"
+                                               placeholder="ex: AAPL, MSFT, TSLA..." required />
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        Entrez le symbole d'une action pour voir les options disponibles.
+                                    </div>
+                                </div>
+                            </form>
+
+                            <div class="info-status" id="ticker-info" style="display: none;">
+                                <span class="badge bg-primary">Prix actuel: <span id="current-spot"></span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section liste des options -->
+                    <div class="card options-panel mb-3">
+                        <div class="card-header">
+                            <div class="section-title">
+                                <i class="bi bi-list-ul"></i> Options disponibles
+                                <span class="collapsed-info" id="options-ticker-display"></span>
+                            </div>
+                            <button class="collapse-btn" data-target="options-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="options-body">
+                            <div id="no-ticker-selected" class="nodata-message">
+                                <i class="bi bi-arrow-up-circle"></i>
+                                <p>Recherchez un ticker pour voir les options disponibles</p>
+                            </div>
+
+                            <div id="options-content" style="display: none;">
+                                <div class="row mb-2">
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Type</span>
+                                            <select id="filter-type" class="form-select">
+                                                <option value="all">Tous</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Put">Put</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Tri</span>
+                                            <select id="sort-by" class="form-select">
+                                                <option value="strike">Strike</option>
+                                                <option value="expiry">Expiration</option>
+                                                <option value="type">Type</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Date</span>
+                                            <select id="expiry-filter" class="form-select">
+                                                <option value="all">Toutes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Strike</th>
+                                                <th>Expiration</th>
+                                                <th>Maturité</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="options-table">
+                                            <!-- Les options seront insérées ici -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section paramètres de calcul -->
+                    <div class="card param-panel">
+                        <div class="card-header">
+                            <div class="section-title">
+                                <i class="bi bi-sliders"></i> Paramètres de pricing
+                                <span class="collapsed-info" id="option-details-display"></span>
+                            </div>
+                            <button class="collapse-btn" data-target="param-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="param-body">
+                            <div id="no-option-selected" class="nodata-message">
+                                <i class="bi bi-hand-index"></i>
+                                <p>Sélectionnez une option dans la liste pour définir ses paramètres</p>
+                            </div>
+
+                            <form id="pricing-form" style="display: none;">
+                                <input type="hidden" id="option-symbol" name="optionSymbol" />
+                                <input type="hidden" id="option-type" name="optionType" />
+
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="display-option-type" class="form-label">Type</label>
+                                        <input type="text" id="display-option-type" class="form-control" readonly />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="strike" class="form-label">Prix d'exercice</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="text" id="strike" name="strike" class="form-control" readonly />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="spot" class="form-label">Prix du sous-jacent</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" id="spot" name="spot" class="form-control" step="0.01" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="maturity" class="form-label">Maturité (années)</label>
+                                        <input type="number" id="maturity" name="maturity" class="form-control" readonly />
+                                    </div>
+                                </div>
+
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="interest-rate" class="form-label">Taux sans risque (%)</label>
+                                        <div class="input-group">
+                                            <input type="number" id="interest-rate" name="interestRate" class="form-control" step="0.1" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="volatility" class="form-label">
+                                            Volatilité initiale (%)
+                                            <i class="bi bi-info-circle param-info" title="Volatilité initiale (v₀) dans le modèle de Heston"></i>
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="number" id="volatility" name="v0" class="form-control" step="0.1" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Paramètres spécifiques du modèle de Heston -->
+                                <div class="heston-params">
+                                    <h6 class="mb-2">Paramètres du modèle de Heston</h6>
+                                    
+                                    <div class="row form-row">
+                                        <div class="col-md-6">
+                                            <label for="kappa" class="form-label">
+                                                Kappa (κ)
+                                                <i class="bi bi-info-circle param-info" title="Taux de retour à la moyenne. Plus κ est élevé, plus vite la volatilité retourne à sa moyenne."></i>
+                                            </label>
+                                            <div class="param-slider">
+                                                <input type="range" id="kappa-slider" class="form-range" min="0.1" max="5" step="0.1" value="1.5">
+                                                <div class="d-flex">
+                                                    <span>0.1</span>
+                                                    <span id="kappa-value">1.5</span>
+                                                    <span>5.0</span>
+                                                </div>
+                                                <input type="hidden" id="kappa" name="kappa" value="1.5">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="theta" class="form-label">
+                                                Theta (θ)
+                                                <i class="bi bi-info-circle param-info" title="Niveau moyen de volatilité à long terme vers lequel la volatilité tend."></i>
+                                            </label>
+                                            <div class="param-slider">
+                                                <input type="range" id="theta-slider" class="form-range" min="0.01" max="0.25" step="0.01" value="0.04">
+                                                <div class="d-flex">
+                                                    <span>0.01</span>
+                                                    <span id="theta-value">0.04</span>
+                                                    <span>0.25</span>
+                                                </div>
+                                                <input type="hidden" id="theta" name="theta" value="0.04">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row form-row">
+                                        <div class="col-md-6">
+                                            <label for="sigma" class="form-label">
+                                                Sigma (σ)
+                                                <i class="bi bi-info-circle param-info" title="Volatilité de la volatilité. Mesure l'amplitude des fluctuations de la volatilité."></i>
+                                            </label>
+                                            <div class="param-slider">
+                                                <input type="range" id="sigma-slider" class="form-range" min="0.1" max="1" step="0.05" value="0.3">
+                                                <div class="d-flex">
+                                                    <span>0.1</span>
+                                                    <span id="sigma-value">0.3</span>
+                                                    <span>1.0</span>
+                                                </div>
+                                                <input type="hidden" id="sigma" name="sigma" value="0.3">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="rho" class="form-label">
+                                                Rho (ρ)
+                                                <i class="bi bi-info-circle param-info" title="Corrélation entre le prix du sous-jacent et sa volatilité. Généralement négative (skew de volatilité)."></i>
+                                            </label>
+                                            <div class="param-slider">
+                                                <input type="range" id="rho-slider" class="form-range" min="-0.9" max="0.5" step="0.05" value="-0.7">
+                                                <div class="d-flex">
+                                                    <span>-1</span>
+                                                    <span id="rho-value">-0.7</span>
+                                                    <span>1</span>
+                                                </div>
+                                                <input type="hidden" id="rho" name="rho" value="-0.7">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label for="simulations" class="form-label">Nombre de simulations (Monte Carlo)</label>
+                                    <input type="range" id="simulations" name="simulations" class="form-range"
+                                           min="1000" max="50000" step="1000" />
+                                    <div class="d-flex justify-content-between">
+                                        <small>1,000</small>
+                                        <small id="simulations-value">10,000</small>
+                                        <small>50,000</small>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-calculate w-100 mt-2 position-relative overflow-hidden">
+                                    <i class="bi bi-calculator me-1"></i>Calculer les prix avec Heston
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panneau de droite (résultats) -->
+                <div class="right-panel">
+                    <!-- Section résultats -->
+                    <div class="card results-panel">
+                        <div class="card-header">
+                            <div class="section-title">
+                                <i class="bi bi-bar-chart-fill"></i> Résultats
+                                <span class="badge bg-dark ms-2" id="option-ticker"></span>
+                            </div>
+                            <button class="collapse-btn" data-target="results-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="results-body">
+                            <div id="no-results" class="nodata-message">
+                                <i class="bi bi-calculator"></i>
+                                <p>Remplissez les paramètres et cliquez sur Calculer pour voir les résultats</p>
+                            </div>
+
+                            <div id="results-content" style="display: none;">
+                                <!-- Visualisations en premier -->
+                                <div class="unified-results">
+                                    <!-- Surface 3D en premier -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Visualisations</h6>
+                                            <div>
+                                                <button type="button" class="surface-toggle-btn active" data-surface="volatility">Volatilité</button>
+                                                <button type="button" class="surface-toggle-btn" data-surface="price">Prix</button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <ul class="nav nav-tabs" id="chartTabs" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="surface-tab" data-bs-toggle="tab" data-bs-target="#volatility-surface-tab" type="button">
+                                                        <i class="bi bi-bounding-box me-1"></i>Surface 3D
+                                                    </button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="spot-tab" data-bs-toggle="tab" data-bs-target="#spot-chart-tab" type="button">
+                                                        <i class="bi bi-graph-up me-1"></i>Prix par Spot
+                                                    </button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="volatility-tab" data-bs-toggle="tab" data-bs-target="#volatility-chart-tab" type="button">
+                                                        <i class="bi bi-bar-chart me-1"></i>Prix par Volatilité
+                                                    </button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="time-tab" data-bs-toggle="tab" data-bs-target="#time-chart-tab" type="button">
+                                                        <i class="bi bi-clock me-1"></i>Prix par Temps
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content p-2 border border-top-0 rounded-bottom">
+                                                <div class="tab-pane fade show active" id="volatility-surface-tab">
+                                                    <h6 class="mb-2">Surface de volatilité implicite</h6>
+                                                    <div id="plot3d"></div>
+                                                </div>
+                                                <div class="tab-pane fade" id="spot-chart-tab">
+                                                    <h6 class="mb-2">Variation du prix en fonction du prix du sous-jacent</h6>
+                                                    <div class="chart-container">
+                                                        <canvas id="spot-chart"></canvas>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane fade" id="volatility-chart-tab">
+                                                    <h6 class="mb-2">Variation du prix en fonction de la volatilité</h6>
+                                                    <div class="chart-container">
+                                                        <canvas id="volatility-chart"></canvas>
+                                                    </div>
+                                                </div>
+                                                <div class="tab-pane fade" id="time-chart-tab">
+                                                    <h6 class="mb-2">Variation du prix en fonction du temps jusqu'à l'expiration</h6>
+                                                    <div class="chart-container">
+                                                        <canvas id="time-chart"></canvas>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prix calculés -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Prix calculés</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="price-display">
+                                                        <div class="price-label">Solution semi-analytique</div>
+                                                        <div id="semi-analytical-price" class="price-value semi-analytical">--</div>
+                                                    </div>
+                                                    <div class="price-display">
+                                                        <div class="price-label">Monte Carlo</div>
+                                                        <div id="montecarlo-price" class="price-value montecarlo">--</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="price-display">
+                                                        <div class="price-label">Prix du marché</div>
+                                                        <div id="market-price" class="price-value market">--</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Greeks -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Greeks</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="greek-card">
+                                                        <div class="greek-label">Delta (Δ)</div>
+                                                        <div id="delta-value" class="greek-value">--</div>
+                                                        <div class="greek-description">Variation / Prix du sous-jacent</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="greek-card">
+                                                        <div class="greek-label">Gamma (Γ)</div>
+                                                        <div id="gamma-value" class="greek-value">--</div>
+                                                        <div class="greek-description">Variation du delta</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="greek-card">
+                                                        <div class="greek-label">Theta (Θ)</div>
+                                                        <div id="theta-value" class="greek-value">--</div>
+                                                        <div class="greek-description">Dégradation temporelle</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="greek-card">
+                                                        <div class="greek-label">Vega (ν)</div>
+                                                        <div id="vega-value" class="greek-value">--</div>
+                                                        <div class="greek-description">Sensibilité à la volatilité</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="update-badge mx-auto d-inline-flex">
+                <i class="bi bi-clock-history icon"></i>
+                <span>Dernière mise à jour: <span class="timestamp">2025-05-01 08:41:05</span> par <span class="user">hajji-achraf</span></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bouton de basculement du thème -->
+    <button id="themeToggle" class="theme-toggle">
+        <i class="bi bi-moon"></i>
+    </button>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let allOptions = []; // Pour stocker toutes les options disponibles
+        let charts = {}; // Pour stocker les références aux graphiques Chart.js
+        let darkMode = localStorage.getItem('darkMode') === 'true'; // État initial du mode sombre
+        let selectedOptionSymbol = null; // Pour stocker l'option actuellement sélectionnée
+        let currentSurfaceType = 'volatility'; // Type de surface 3D (volatilité ou prix)
+
+        // Animation des éléments lors du chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Appliquer le mode sombre si nécessaire
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '<i class="bi bi-sun"></i>';
+            }
+
+            // Initialisation des événements
+            initializeEvents();
+
+            // Initialiser les sliders
+            initializeSliders();
+
+            // Activer le basculement du thème
+            document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+
+            // Initialiser les boutons de repli des sections
+            initializeCollapseSections();
+
+            // Initialiser les boutons de surface
+            initializeSurfaceToggle();
+        });
+
+        // Fonction pour initialiser les sliders des paramètres de Heston
+        function initializeSliders() {
+            // Slider pour les simulations Monte-Carlo
+            const simulationsSlider = document.getElementById('simulations');
+            const simulationsValue = document.getElementById('simulations-value');
+            simulationsSlider.value = 10000;
+            simulationsValue.textContent = '10,000';
+
+            simulationsSlider.addEventListener('input', function() {
+                simulationsValue.textContent = parseInt(this.value).toLocaleString();
+            });
+
+            // Sliders des paramètres de Heston
+            initializeParameterSlider('kappa', 2);
+            initializeParameterSlider('theta', 2);
+            initializeParameterSlider('sigma', 2);
+            initializeParameterSlider('rho', 2);
+        }
+
+        // Fonction pour initialiser un slider de paramètre
+        function initializeParameterSlider(paramName, decimals) {
+            const slider = document.getElementById(`${paramName}-slider`);
+            const valueDisplay = document.getElementById(`${paramName}-value`);
+            const hiddenInput = document.getElementById(paramName);
+
+            slider.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                valueDisplay.textContent = value.toFixed(decimals);
+                hiddenInput.value = value;
+            });
+        }
+
+        // Fonction pour initialiser les boutons de basculement de surface
+        function initializeSurfaceToggle() {
+            document.querySelectorAll('.surface-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Mettre à jour le type de surface actuel
+                    currentSurfaceType = this.getAttribute('data-surface');
+
+                    // Mettre à jour les classes actives
+                    document.querySelectorAll('.surface-toggle-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    // Recréer la surface si des données sont disponibles
+                    if (document.getElementById('plot3d').data) {
+                        updateVolatilitySurface();
+                    }
+                });
+            });
+        }
+
+        // Fonction pour initialiser les boutons de repli
+        function initializeCollapseSections() {
+            document.querySelectorAll('.collapse-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement.style.display === 'none') {
+                        targetElement.style.display = 'block';
+                        this.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                    } else {
+                        targetElement.style.display = 'none';
+                        this.innerHTML = '<i class="bi bi-chevron-down"></i>';
+                    }
+                });
+            });
+        }
+
+        // Basculer le mode sombre
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.innerHTML = darkMode ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
+
+            // Sauvegarder la préférence
+            localStorage.setItem('darkMode', darkMode);
+
+            // Mettre à jour les graphiques si nécessaires
+            updateChartTheme();
+        }
+
+        // Mettre à jour le thème des graphiques
+        function updateChartTheme() {
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.update === 'function') {
+                    // Mettre à jour les couleurs du graphique selon le thème
+                    chart.options.scales.x.grid.color = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    chart.options.scales.y.grid.color = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    chart.options.scales.x.ticks.color = darkMode ? '#e5e5e5' : '#333';
+                    chart.options.scales.y.ticks.color = darkMode ? '#e5e5e5' : '#333';
+                    chart.update();
+                }
+            });
+
+            // Mettre à jour Plotly 3D si présent
+            var plot3dElement = document.getElementById('plot3d');
+            if (plot3dElement && plot3dElement.data) {
+                var paperColor = darkMode ? '#1a2530' : '#ffffff';
+                var textColor = darkMode ? '#e5e5e5' : '#333333';
+
+                Plotly.relayout(plot3dElement, {
+                    'paper_bgcolor': paperColor,
+                    'plot_bgcolor': paperColor,
+                    'font.color': textColor,
+                    'scene.xaxis.color': textColor,
+                    'scene.yaxis.color': textColor,
+                    'scene.zaxis.color': textColor
+                });
+            }
+        }
+
+        // Initialisation des événements
+        function initializeEvents() {
+            // Formulaire de recherche
+            document.getElementById('search-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchTicker();
+            });
+
+            // Formulaire de pricing
+            document.getElementById('pricing-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                calculatePrices();
+            });
+
+            // Filtres des options
+            document.getElementById('filter-type').addEventListener('change', filterAndSortOptions);
+            document.getElementById('sort-by').addEventListener('change', filterAndSortOptions);
+            document.getElementById('expiry-filter').addEventListener('change', filterAndSortOptions);
+
+            // Onglets des graphiques
+            document.querySelectorAll('#chartTabs button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    $(this).tab('show');
+
+                    // Si c'est l'onglet de la surface 3D, redimensionner Plotly
+                    if (this.id === 'surface-tab') {
+                        setTimeout(() => {
+                            var plot3dElement = document.getElementById('plot3d');
+                            if (plot3dElement && plot3dElement.data) {
+                                Plotly.relayout(plot3dElement, {});
+                            }
+                        }, 100);
+                    }
+                });
+            });
+        }
+
+        // Affichage des messages d'erreur
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+
+            // Scroll vers le message d'erreur
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Affichage du chargement
+        function showLoading(message = 'Chargement...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Recherche d'un ticker
+        function searchTicker() {
+            const tickerInput = document.getElementById('ticker-input');
+            const ticker = tickerInput.value.trim().toUpperCase();
+
+            if (!ticker) {
+                showError('Veuillez entrer un ticker valide');
+                return;
+            }
+
+            showLoading('Recherche des options disponibles...');
+
+            // Appel API
+            fetch(`/Option/Heston/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `ticker=${encodeURIComponent(ticker)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+
+                if (data.success) {
+                    // Mise à jour des informations
+                    document.getElementById('ticker-info').style.display = 'block';
+                    document.getElementById('current-spot').textContent = `$${data.spot.toFixed(2)}`;
+
+                    // Afficher le ticker dans l'en-tête de la section des options
+                    document.getElementById('options-ticker-display').textContent = data.ticker;
+
+                    // Masquer le message "aucun ticker sélectionné"
+                    document.getElementById('no-ticker-selected').style.display = 'none';
+                    document.getElementById('options-content').style.display = 'block';
+
+                    // Stockage des options
+                    allOptions = data.options;
+
+                    // Remplir les filtres d'expiration
+                    populateExpiryFilter(data.options);
+
+                    // Affichage des options
+                    displayOptions(data.options);
+
+                } else {
+                    showError(data.error || 'Une erreur est survenue lors de la recherche');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Erreur:', error);
+                showError('Erreur de communication avec le serveur');
+            });
+        }
+
+        // Remplir le filtre des dates d'expiration
+        function populateExpiryFilter(options) {
+            const expiryFilter = document.getElementById('expiry-filter');
+            expiryFilter.innerHTML = '<option value="all">Toutes les dates</option>';
+
+            // Extraire les dates d'expiration uniques
+            const expiryDates = [...new Set(options.map(option => option.expirationDate))];
+            expiryDates.sort((a, b) => new Date(a) - new Date(b));
+
+            // Ajouter chaque date comme option
+            expiryDates.forEach(date => {
+                const formattedDate = new Date(date).toLocaleDateString('fr-FR');
+                const option = document.createElement('option');
+                option.value = date;
+                option.textContent = formattedDate;
+                expiryFilter.appendChild(option);
+            });
+        }
+
+        // Affichage des options dans le tableau
+        function displayOptions(options) {
+            const optionsTable = document.getElementById('options-table');
+            optionsTable.innerHTML = '';
+
+            if (options.length === 0) {
+                optionsTable.innerHTML = '<tr><td colspan="4" class="text-center">Aucune option disponible</td></tr>';
+                return;
+            }
+
+            options.forEach((option, index) => {
+                const row = document.createElement('tr');
+                row.classList.add('option-row');
+                row.setAttribute('data-symbol', option.optionSymbol);
+
+                // Ajouter la classe selected si c'est l'option actuellement sélectionnée
+                if (option.optionSymbol === selectedOptionSymbol) {
+                    row.classList.add('selected-option-row');
+                }
+
+                // Formater la date d'expiration
+                const expiryDate = new Date(option.expirationDate);
+                const formattedDate = expiryDate.toLocaleDateString('fr-FR');
+
+                // Formater la maturité avec 4 décimales
+                const formattedMaturity = option.maturity.toFixed(4);
+
+                // Créer la ligne du tableau
+                row.innerHTML = `
+                    <td>
+                        <span class="badge ${option.optionType === 'Call' ? 'bg-success' : 'bg-danger'}">
+                            ${option.optionType}
+                        </span>
+                    </td>
+                    <td>$${option.strike.toFixed(2)}</td>
+                    <td>${formattedDate}</td>
+                    <td>${formattedMaturity}</td>
+                `;
+
+                // Ajouter un événement de clic pour sélectionner l'option
+                row.addEventListener('click', function() {
+                    // Supprimer la sélection précédente
+                    document.querySelectorAll('.option-row').forEach(r => {
+                        r.classList.remove('selected-option-row');
+                    });
+
+                    // Ajouter la classe de sélection
+                    this.classList.add('selected-option-row');
+
+                    // Charger les détails de l'option sélectionnée
+                    loadOption(this.getAttribute('data-symbol'));
+                });
+
+                optionsTable.appendChild(row);
+            });
+        }
+
+        // Filtrage et tri des options
+        function filterAndSortOptions() {
+            const filterType = document.getElementById('filter-type').value;
+            const sortBy = document.getElementById('sort-by').value;
+            const expiryFilter = document.getElementById('expiry-filter').value;
+
+            let filteredOptions = [...allOptions];
+
+            // Filtrer par type
+            if (filterType !== 'all') {
+                filteredOptions = filteredOptions.filter(option => option.optionType === filterType);
+            }
+
+            // Filtrer par date d'expiration
+            if (expiryFilter !== 'all') {
+                filteredOptions = filteredOptions.filter(option =>
+                    new Date(option.expirationDate).toISOString() === new Date(expiryFilter).toISOString()
+                );
+            }
+
+            // Trier les options
+            switch (sortBy) {
+                case 'strike':
+                    filteredOptions.sort((a, b) => a.strike - b.strike);
+                    break;
+                case 'expiry':
+                    filteredOptions.sort((a, b) => new Date(a.expirationDate) - new Date(b.expirationDate));
+                    break;
+                case 'type':
+                    filteredOptions.sort((a, b) => a.optionType.localeCompare(b.optionType));
+                    break;
+            }
+
+            // Afficher les options filtrées
+            displayOptions(filteredOptions);
+        }
+
+        // Chargement des détails d'une option
+        function loadOption(optionSymbol) {
+            showLoading('Chargement des détails de l\'option...');
+
+            // Stocker l'option sélectionnée
+            selectedOptionSymbol = optionSymbol;
+
+            fetch(`/Option/Heston/details/${optionSymbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    hideLoading();
+
+                    if (data.success === false) {
+                        showError(data.error || 'Erreur lors du chargement des détails de l\'option');
+                        return;
+                    }
+
+                    // Mise à jour de l'interface
+                    document.getElementById('option-ticker').textContent = data.ticker;
+                    document.getElementById('option-details-display').textContent = `${data.optionType} $${data.strike}`;
+
+                    // Masquer le message "aucune option sélectionnée"
+                    document.getElementById('no-option-selected').style.display = 'none';
+                    document.getElementById('pricing-form').style.display = 'block';
+
+                    // Remplir le formulaire
+                    document.getElementById('option-symbol').value = data.optionSymbol;
+                    document.getElementById('option-type').value = data.optionType;
+                    document.getElementById('display-option-type').value = data.optionType;
+                    document.getElementById('strike').value = data.strike;
+                    document.getElementById('spot').value = data.spot;
+                    document.getElementById('maturity').value = data.maturity;
+                    document.getElementById('interest-rate').value = data.interestRate;
+                    document.getElementById('volatility').value = data.v0;
+
+                    // Paramètres spécifiques de Heston
+                    updateSlider('kappa', data.kappa);
+                    updateSlider('theta', data.theta);
+                    updateSlider('sigma', data.sigma);
+                    updateSlider('rho', data.rho);
+
+                    // Nombre de simulations
+                    document.getElementById('simulations').value = data.simulations;
+                    document.getElementById('simulations-value').textContent = data.simulations.toLocaleString();
+
+                    // Prix du marché
+                    document.getElementById('market-price').textContent = data.marketPrice > 0 ?
+                        `$${data.marketPrice.toFixed(2)}` : 'N/A';
+
+                    // Réinitialiser les autres éléments
+                    document.getElementById('semi-analytical-price').textContent = '--';
+                    document.getElementById('montecarlo-price').textContent = '--';
+                    document.getElementById('finitediff-price').textContent = '--';
+                    document.getElementById('delta-value').textContent = '--';
+                    document.getElementById('gamma-value').textContent = '--';
+                    document.getElementById('theta-value').textContent = '--';
+                    document.getElementById('vega-value').textContent = '--';
+
+                    // Masquer la section de résultats ou afficher le message "pas de résultats"
+                    document.getElementById('no-results').style.display = 'block';
+                    document.getElementById('results-content').style.display = 'none';
+                })
+                .catch(error => {
+                    hideLoading();
+                    console.error('Erreur:', error);
+                    showError('Erreur de communication avec le serveur');
+                });
+        }
+
+        // Mettre à jour un slider et sa valeur affichée
+        function updateSlider(paramName, value) {
+            const slider = document.getElementById(`${paramName}-slider`);
+            const valueDisplay = document.getElementById(`${paramName}-value`);
+            const hiddenInput = document.getElementById(paramName);
+
+            slider.value = value;
+            valueDisplay.textContent = parseFloat(value).toFixed(2);
+            hiddenInput.value = value;
+        }
+
+        // Calcul des prix
+        function calculatePrices() {
+            // Collecter les données du formulaire
+            const formData = {
+                optionSymbol: document.getElementById('option-symbol').value,
+                ticker: document.getElementById('option-ticker').textContent,
+                optionType: document.getElementById('option-type').value,
+                strike: parseFloat(document.getElementById('strike').value),
+                spot: parseFloat(document.getElementById('spot').value),
+                maturity: parseFloat(document.getElementById('maturity').value),
+                interestRate: parseFloat(document.getElementById('interest-rate').value),
+                v0: parseFloat(document.getElementById('volatility').value),
+                kappa: parseFloat(document.getElementById('kappa').value),
+                theta: parseFloat(document.getElementById('theta').value),
+                sigma: parseFloat(document.getElementById('sigma').value),
+                rho: parseFloat(document.getElementById('rho').value),
+                simulations: parseInt(document.getElementById('simulations').value)
+            };
+
+            // Vérification des valeurs
+            if (isNaN(formData.spot) || formData.spot <= 0) {
+                showError('Le prix du sous-jacent doit être un nombre positif');
+                return;
+            }
+            if (isNaN(formData.interestRate)) {
+                showError('Le taux sans risque doit être un nombre');
+                return;
+            }
+            if (isNaN(formData.v0) || formData.v0 <= 0) {
+                showError('La volatilité initiale doit être un nombre positif');
+                return;
+            }
+
+            showLoading('Calcul des prix avec le modèle de Heston...');
+
+            // Appel API pour le calcul
+            fetch('/Option/Heston/price', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+
+                if (data.success) {
+                    // Masquer le message "pas de résultats" et afficher la section de résultats
+                    document.getElementById('no-results').style.display = 'none';
+                    document.getElementById('results-content').style.display = 'block';
+
+                    // Créer d'abord la surface 3D
+                    setTimeout(() => {
+                        createVolatilitySurface(data.prices.volatilitySurface);
+                    }, 300);
+
+                    // Afficher les résultats avec animation
+                    setTimeout(() => {
+                        // Affichage des prix avec une animation de compteur
+                        animateCounter('semi-analytical-price', data.prices.semiAnalyticalPrice);
+                        animateCounter('montecarlo-price', data.prices.monteCarloPrice);
+                        animateCounter('finitediff-price', data.prices.finiteDifferencePrice);
+
+                        // Affichage des Greeks
+                        animateCounter('delta-value', data.prices.delta, false);
+                        animateCounter('gamma-value', data.prices.gamma, false);
+                        animateCounter('theta-value', data.prices.thetaGreek, false);
+                        animateCounter('vega-value', data.prices.vega, false);
+                    }, 600);
+
+                    // Créer les autres graphiques avec un délai
+                    setTimeout(() => {
+                        // Créer les graphiques
+                        createCharts(data.prices);
+                    }, 900);
+                } else {
+                    showError(data.error || 'Erreur lors du calcul des prix');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Erreur:', error);
+                showError('Erreur de communication avec le serveur');
+            });
+        }
+
+        // Animation de compteur pour les prix et les Greeks
+        function animateCounter(elementId, finalValue, isCurrency = true) {
+            const element = document.getElementById(elementId);
+            if (!element || finalValue === undefined) return;
+
+            // Réinitialiser la valeur
+            if (isCurrency) {
+                element.textContent = '$0.00';
+            } else {
+                element.textContent = '0.0000';
+            }
+
+            const duration = 1000; // 1 seconde d'animation
+            const frameDuration = 1000/60; // 60 fps
+            const totalFrames = Math.round(duration / frameDuration);
+
+            // Valeur absolue pour le calcul de l'incrément
+            const absValue = Math.abs(finalValue);
+            const valueIncrement = absValue / totalFrames;
+
+            let currentFrame = 0;
+            let currentValue = 0;
+            // Déterminer le sens de l'animation (positif ou négatif)
+            const isNegative = finalValue < 0;
+
+            // Fonction d'animation avec easing
+            const animate = () => {
+                currentFrame++;
+
+                // Appliquer une courbe d'accélération/décélération pour une animation plus fluide
+                const progress = currentFrame / totalFrames;
+                // Fonction easing: accélération au début, décélération à la fin
+                const easingFactor = progress < 0.5
+                    ? 4 * progress * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+                // Calculer la valeur actuelle avec easing
+                currentValue = absValue * easingFactor;
+
+                // Si on est à la dernière image, utiliser la valeur finale exacte
+                if (currentFrame === totalFrames) {
+                    currentValue = absValue;
+                }
+
+                // Appliquer le signe si négatif
+                const displayValue = isNegative ? -currentValue : currentValue;
+
+                // Formater et afficher la valeur
+                if (isCurrency) {
+                    element.textContent = `$${displayValue.toFixed(2)}`;
+                } else {
+                    element.textContent = displayValue.toFixed(4);
+                }
+
+                // Continuer l'animation si pas terminée
+                if (currentFrame < totalFrames) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // Animation terminée - ajouter un petit effet de rebond
+                    element.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        element.style.transition = 'transform 0.2s ease-out';
+                        element.style.transform = 'scale(1)';
+                    }, 50);
+                }
+            };
+
+            // Démarrer l'animation
+            element.style.transition = 'none';
+            requestAnimationFrame(animate);
+        }
+
+        // Fonction pour créer les graphiques
+        function createCharts(prices) {
+            // Détruire les graphiques existants s'ils existent
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+
+            // Configuration commune pour tous les graphiques
+            const chartConfig = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: darkMode ? '#2c3e50' : 'white',
+                        titleColor: darkMode ? '#ecf0f1' : '#2c3e50',
+                        bodyColor: darkMode ? '#ecf0f1' : '#2c3e50',
+                        borderColor: darkMode ? '#1a2530' : '#e9ecef',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    }
+                }
+            };
+
+            // 1. Graphique par prix du sous-jacent
+            const spotCtx = document.getElementById('spot-chart').getContext('2d');
+
+            // Générer des points pour le graphique spot
+            const baseSpot = parseFloat(document.getElementById('spot').value);
+            const spotPoints = [];
+            const spotRange = baseSpot * 0.4; // 40% de variation autour du prix actuel
+
+            for (let i = -10; i <= 10; i++) {
+                spotPoints.push(baseSpot + (spotRange * i / 10));
+            }
+
+            const spotData = {
+                labels: spotPoints.map(spot => spot.toFixed(2)),
+                datasets: [
+                    {
+                        label: 'Semi-analytique',
+                        data: spotPoints.map(spot => calculateAnalyticalPrice(spot, prices.semiAnalyticalPrice, prices.delta, prices.gamma)),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    },
+                    {
+                        label: 'Monte Carlo',
+                        data: spotPoints.map(spot => calculateAnalyticalPrice(spot, prices.monteCarloPrice, prices.delta, prices.gamma) + (Math.random() * 0.02 - 0.01)),
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }
+                ]
+            };
+
+            charts.spot = new Chart(spotCtx, {
+                type: 'line',
+                data: spotData,
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        title: {
+                            display: true,
+                            text: 'Prix de l\'option par rapport au prix du sous-jacent',
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    }
+                }
+            });
+
+            // 2. Graphique par volatilité
+            const volCtx = document.getElementById('volatility-chart').getContext('2d');
+
+            // Générer des points pour le graphique de volatilité
+            const baseVol = parseFloat(document.getElementById('volatility').value);
+            const volPoints = [];
+
+            for (let i = 0; i <= 20; i++) {
+                volPoints.push(5 + i * 2); // Volatilité de 5% à 45%
+            }
+
+            const volData = {
+                labels: volPoints.map(vol => vol + '%'),
+                datasets: [
+                    {
+                        label: 'Semi-analytique',
+                        data: volPoints.map(vol => calculateVolatilityPrice(vol, prices.semiAnalyticalPrice, prices.vega, baseVol)),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }
+                ]
+            };
+
+            charts.volatility = new Chart(volCtx, {
+                type: 'line',
+                data: volData,
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        title: {
+                            display: true,
+                            text: 'Prix de l\'option par rapport à la volatilité initiale',
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    }
+                }
+            });
+
+            // 3. Graphique par temps jusqu'à expiration
+            const timeCtx = document.getElementById('time-chart').getContext('2d');
+
+            // Générer des points pour le graphique de temps
+            const baseMaturity = parseFloat(document.getElementById('maturity').value);
+            const maxMaturity = Math.max(baseMaturity, 1); // Au moins 1 an pour le graphique
+            const timePoints = [];
+
+            for (let i = 0; i <= 10; i++) {
+                timePoints.push(maxMaturity * i / 10);
+            }
+
+            const timeData = {
+                labels: timePoints.map(t => (t * 365).toFixed(0) + ' jours'),
+                datasets: [
+                    {
+                        label: 'Semi-analytique',
+                        data: timePoints.map(t => calculateTimePrice(t, prices.semiAnalyticalPrice, prices.thetaGreek, baseMaturity)),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        pointRadius: 3
+                    }
+                ]
+            };
+
+            charts.time = new Chart(timeCtx, {
+                type: 'line',
+                data: timeData,
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        title: {
+                            display: true,
+                            text: 'Prix de l\'option par rapport au temps jusqu\'à expiration',
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fonction pour créer la surface de volatilité 3D
+        function createVolatilitySurface(surfaceData) {
+            // Vérifier que les données de surface sont disponibles
+            if (!surfaceData || !surfaceData.strikes || !surfaceData.maturities || !surfaceData.impliedVolatilities) {
+                console.error('Données de surface manquantes');
+                return;
+            }
+
+            // Configurer les données pour Plotly en fonction du type de surface
+            let plotData = [];
+
+            // Déterminer le titre et les labels des axes en fonction du type de surface
+            let title = currentSurfaceType === 'volatility' ?
+                'Surface de volatilité implicite' : 'Surface de prix d\'option';
+
+            let zAxisTitle = currentSurfaceType === 'volatility' ?
+                'Volatilité (%)' : 'Prix ($)';
+
+            // Valeurs pour la coloration
+            let zValues = currentSurfaceType === 'volatility' ?
+                surfaceData.impliedVolatilities :
+                // Simuler des prix d'options basés sur les volatilités
+                surfaceData.impliedVolatilities.map((vol, i) => {
+                    const strike = surfaceData.strikes[i];
+                    const maturity = surfaceData.maturities[i];
+                    // Formule simplifiée basée sur les valeurs de volatilité
+                    return 2 + 0.1 * vol * Math.sqrt(maturity) * (1 - Math.abs(1 - strike / parseFloat(document.getElementById('spot').value)));
+                });
+
+            // Configuration du graphique 3D
+            plotData = [{
+                type: 'mesh3d',
+                x: surfaceData.strikes,
+                y: surfaceData.maturities,
+                z: currentSurfaceType === 'volatility' ? surfaceData.impliedVolatilities : zValues,
+                intensity: zValues,
+                colorscale: currentSurfaceType === 'volatility' ? 'Jet' : 'Viridis',
+                opacity: 0.8
+            }];
+
+            // Configuration du graphique 3D
+            const layout = {
+                title: title,
+                scene: {
+                    xaxis: {title: 'Prix d\'exercice'},
+                    yaxis: {title: 'Maturité (années)'},
+                    zaxis: {title: zAxisTitle}
+                },
+                margin: {l: 0, r: 0, b: 0, t: 50},
+                paper_bgcolor: darkMode ? '#1a2530' : '#ffffff',
+                plot_bgcolor: darkMode ? '#1a2530' : '#ffffff',
+                font: {
+                    color: darkMode ? '#e5e5e5' : '#333333'
+                }
+            };
+
+            // Créer ou mettre à jour le graphique Plotly
+            Plotly.newPlot('plot3d', plotData, layout);
+        }
+
+        // Mettre à jour la surface 3D
+        function updateVolatilitySurface() {
+            // Récupérer les données de surface actuelles
+            const plot3dElement = document.getElementById('plot3d');
+            if (plot3dElement && plot3dElement.data && plot3dElement.data[0]) {
+                const data = plot3dElement.data[0];
+
+                // Mettre à jour le titre et l'axe Z
+                const title = currentSurfaceType === 'volatility' ?
+                    'Surface de volatilité implicite' : 'Surface de prix d\'option';
+
+                const zAxisTitle = currentSurfaceType === 'volatility' ?
+                    'Volatilité (%)' : 'Prix ($)';
+
+                // Simuler les valeurs de prix si nécessaire
+                if (currentSurfaceType === 'price' && data.x && data.y) {
+                    const strikes = data.x;
+                    const maturities = data.y;
+                    const vols = data.z; // Volatilités originales
+
+                    // Convertir les volatilités en prix pour la visualisation
+                    const prices = vols.map((vol, i) => {
+                        const strike = strikes[i];
+                        const maturity = maturities[i];
+                        // Formule simplifiée basée sur les valeurs de volatilité
+                        return 2 + 0.1 * vol * Math.sqrt(maturity) * (1 - Math.abs(1 - strike / parseFloat(document.getElementById('spot').value)));
+                    });
+
+                    Plotly.restyle(plot3dElement, {
+                        'z': [currentSurfaceType === 'volatility' ? vols : prices],
+                        'intensity': [prices],
+                        'colorscale': currentSurfaceType === 'volatility' ? 'Jet' : 'Viridis'
+                    });
+                }
+
+                // Mettre à jour les titres
+                Plotly.relayout(plot3dElement, {
+                    'title': title,
+                    'scene.zaxis.title': zAxisTitle
+                });
+            }
+        }
+
+        // Fonctions d'estimation des prix pour différents scénarios
+        function calculateAnalyticalPrice(spot, basePrice, delta, gamma) {
+            // Formule approximative de Taylor
+            const baseSpot = parseFloat(document.getElementById('spot').value);
+            const dSpot = spot - baseSpot;
+            return Math.max(0, basePrice + delta * dSpot + 0.5 * gamma * dSpot * dSpot);
+        }
+
+        function calculateVolatilityPrice(vol, basePrice, vega, baseVol) {
+            // Formule approximative avec vega
+            const dVol = (vol - baseVol) / 100; // Convertir en décimal
+            return Math.max(0, basePrice + vega * dVol);
+        }
+
+        function calculateTimePrice(time, basePrice, theta, baseMaturity) {
+            // Formule approximative avec theta
+            const dTime = time - baseMaturity;
+            return Math.max(0, basePrice - theta * dTime);
+        }
+
+        // Animation de la page au chargement initial
+        window.addEventListener('load', function() {
+            // Créer un effet de chargement progressif
+            const mainSections = document.querySelectorAll('.card');
+            mainSections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                }, index * 100);
+            });
+
+            // Animation du titre de l'application
+            const appTitle = document.querySelector('.app-title');
+            if (appTitle) {
+                appTitle.style.opacity = '0';
+                appTitle.style.transform = 'translateY(-20px)';
+
+                setTimeout(() => {
+                    appTitle.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    appTitle.style.opacity = '1';
+                    appTitle.style.transform = 'translateY(0)';
+                }, 200);
+            }
+
+            // Mise à jour de la date et de l'utilisateur
+            updateTimestampAndUser();
+        });
+
+        // Mise à jour de la date et de l'utilisateur
+        function updateTimestampAndUser() {
+            const timestampElements = document.querySelectorAll('.timestamp');
+            const userElements = document.querySelectorAll('.user');
+
+            timestampElements.forEach(el => {
+                el.textContent = '2025-05-01 08:41:05';
+            });
+
+            userElements.forEach(el => {
+                el.textContent = 'hajji-achraf';
+            });
+        }
+
+        // Optimisations pour les appareils mobiles
+        function setupMobileOptimizations() {
+            // Vérifier si l'appareil est mobile (écran < 768px)
+            const isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+                // Ajuster la taille des graphiques
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.style.height = '250px';
+                });
+
+                // Simplifier l'interface
+                document.querySelectorAll('.greek-description').forEach(desc => {
+                    desc.style.display = 'none';
+                });
+
+                // Adapter la grille unifiée pour mobile
+                document.querySelector('.unified-container').style.display = 'block';
+            }
+        }
+
+        // Appeler l'optimisation pour mobiles au chargement et au redimensionnement
+        window.addEventListener('load', setupMobileOptimizations);
+        window.addEventListener('resize', setupMobileOptimizations);
+    </script>
+</body>
+</html>

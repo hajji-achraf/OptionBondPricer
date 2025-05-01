@@ -1,0 +1,1523 @@
+﻿@model App.Models.VasicekModel
+@{
+    ViewData["Title"] = "Vasicek Interest Rate Model";
+    Layout = null;
+    string currentDateTime = "2025-04-29 18:39:09";
+    string currentUser = "hajji-achraf";
+}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --primary-color: #e0e0e0;
+            --secondary-color: #6b46c1;
+            --tertiary-color: #f97316;
+            --quaternary-color: #10b981;
+            --text-color: #333;
+            --text-secondary: #666;
+            --light-gray: #f5f5f5;
+            --gray: #e0e0e0;
+            --dark-gray: #888;
+            --border-radius: 8px;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --transition: all 0.2s ease;
+            --bs-primary: #10b981;
+            --bs-primary-rgb: 107, 70, 193;
+            --bs-secondary: #10b981;
+            --bs-secondary-rgb: 16, 185, 129;
+            --bs-dark: #333;
+            --surface-color: #ffffff;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .dark-mode {
+            --background-color: #121212;
+            --text-color: #e5e5e5;
+            --text-secondary: #aaa;
+            --light-gray: #1e1e1e;
+            --gray: #2d2d2d;
+            --dark-gray: #aaa;
+            --surface-color: #1e1e1e;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Animation du titre avec effet d'écriture-effacement */
+        .app-title {
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--bs-primary);
+            display: inline-flex;
+            align-items: center;
+            margin: 0.5rem 0;
+            padding-left: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 0.15em solid var(--secondary-color);
+            animation: typing 5s steps(30) infinite;
+            width: max-content;
+        }
+
+        @@keyframes typing {
+            0%, 100% {
+                width: 0
+            }
+
+            20%, 80% {
+                width: 100%
+            }
+
+            90%, 95% {
+                width: 0
+            }
+        }
+
+        .app-title i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: var(--surface-color);
+            padding: 0.75rem 1rem;
+            font-weight: 800; /* Plus gras pour le titre */
+            color: var(--text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-body {
+            padding: 1rem;
+            background-color: var(--surface-color);
+        }
+
+        .btn-primary {
+            background-color: var(--bs-primary);
+            border-color: var(--bs-primary);
+            transition: var(--transition);
+        }
+
+            .btn-primary:hover {
+                background-color: #5a38a8;
+                border-color: #5a38a8;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow);
+            }
+
+        .btn-secondary {
+            background-color: var(--bs-secondary);
+            border-color: var(--bs-secondary);
+            transition: var(--transition);
+        }
+
+            .btn-secondary:hover {
+                background-color: #0e9f6e;
+                border-color: #0e9f6e;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow);
+            }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0.6rem 1rem;
+            transition: var(--transition);
+        }
+
+            .form-control:focus, .form-select:focus {
+                border-color: var(--bs-primary);
+                box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+            }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+            .table thead th {
+                background-color: #f8f9fa;
+                border-bottom: 2px solid #e9ecef;
+                font-weight: 600;
+                color: var(--text-color);
+            }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            background-color: var(--surface-color);
+            transition: var(--transition);
+        }
+
+            .chart-container:hover {
+                box-shadow: var(--shadow);
+                transform: translateY(-2px);
+            }
+
+        .rate-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            margin-bottom: 0.75rem;
+            transition: var(--transition);
+        }
+
+            .rate-display:hover {
+                background-color: #e9ecef;
+                transform: translateY(-2px);
+                box-shadow: var(--shadow);
+            }
+
+        .rate-label {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .rate-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+            color: white;
+        }
+
+            .rate-value.short-term {
+                background-color: var(--bs-primary);
+            }
+
+            .rate-value.long-term {
+                background-color: var(--bs-secondary);
+            }
+
+            .rate-value.current {
+                background-color: #1abc9c;
+            }
+
+            .rate-value.simulated {
+                background-color: var(--bs-dark);
+            }
+
+        .parameter-card {
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            height: 100%;
+            width: 100%; /* ou 80%, selon ce que tu veux */
+            max-width: none; /* supprime toute limite */
+        }
+
+            .parameter-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--shadow);
+            }
+
+        .parameter-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .parameter-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--bs-primary);
+        }
+
+        .parameter-description {
+            font-size: 0.8rem;
+            text-align: center;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .dark-mode .loading-overlay {
+            background-color: rgba(26,37,48,0.8);
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--surface-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .spinner-text {
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .nav-tabs {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem;
+        }
+
+            .nav-tabs .nav-link {
+                border: none;
+                color: var(--text-color);
+                border-bottom: 2px solid transparent;
+                transition: var(--transition);
+            }
+
+                .nav-tabs .nav-link:hover {
+                    border-color: rgba(0, 0, 0, 0.1);
+                }
+
+                .nav-tabs .nav-link.active {
+                    color: var(--bs-primary);
+                    background-color: transparent;
+                    border-bottom-color: var(--bs-primary);
+                }
+
+        .theme-toggle {
+            position: fixed;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1000;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+            .theme-toggle:hover {
+                transform: rotate(15deg);
+                background: rgba(0, 0, 0, 0.2);
+            }
+
+        .badge {
+            padding: 0.35em 0.65em;
+            font-weight: 600;
+        }
+
+            .badge.bg-primary {
+                background-color: var(--bs-primary) !important;
+            }
+
+            .badge.bg-success {
+                background-color: var(--bs-secondary) !important;
+            }
+
+        #rateCurveChart {
+            height: 500px; /* Augmenté pour occuper plus d'espace */
+            width: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--surface-color);
+            box-shadow: var(--shadow);
+        }
+
+        .update-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            background-color: #f1f5f9;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.5rem;
+        }
+
+            .update-badge .icon {
+                font-size: 1rem;
+                color: var(--bs-primary);
+            }
+
+            .update-badge .user {
+                font-weight: 500;
+                color: var(--bs-primary);
+            }
+
+        .alert-danger {
+            background-color: #fef2f2;
+            border-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .footer {
+            background-color: var(--surface-color);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+            color: var(--text-color);
+            margin-top: 1rem;
+        }
+
+        /* Styles pour la version unifiée */
+        .unified-container {
+            display: grid;
+            grid-template-columns: 1fr 3fr; /* Modifié pour donner plus d'espace au panneau droit */
+            grid-gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @@media (max-width: 992px) {
+            .unified-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .unified-results {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .parameters-panel, .calibration-panel, .results-panel {
+            transition: all 0.3s ease;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: var(--bs-primary);
+            font-size: 1.1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+            .section-title i {
+                margin-right: 0.5rem;
+            }
+
+        .collapsed-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-left: 0.5rem;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+            .collapse-btn:hover {
+                background-color: rgba(0,0,0,0.05);
+            }
+
+        .card.collapsed .card-body {
+            display: none;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
+        .form-row {
+            margin-bottom: 0.75rem;
+        }
+
+        .info-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--bs-primary);
+        }
+
+        .nodata-message {
+            padding: 2rem;
+            text-align: center;
+            color: #6c757d;
+        }
+
+            .nodata-message i {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+                color: #dee2e6;
+            }
+
+        .btn-calculate {
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+            .btn-calculate:active {
+                transform: scale(0.95);
+            }
+
+            /* Animation du bouton de calcul */
+            .btn-calculate::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient( 90deg, transparent, rgba(255, 255, 255, 0.3), transparent );
+                animation: buttonSweep 3s infinite;
+            }
+
+        @@keyframes buttonSweep {
+            0% {
+                left: -100%;
+            }
+
+            50% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Nouveaux styles pour la visualisation des graphiques */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr; /* Un seul graphe par ligne */
+            gap: 1rem;
+            width: 100%;
+        }
+
+        /* Adaptation pour les écrans plus grands */
+        @@media (min-width: 992px) {
+            .charts-container {
+                grid-template-columns: 1fr; /* Force une colonne pour maximiser l'espace */
+            }
+        }
+
+        .chart-wrapper {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            height: 100%;
+        }
+
+            .chart-wrapper h6 {
+                margin-bottom: 1rem;
+                font-weight: 600;
+                color: var(--text-color);
+            }
+
+        /* Agrandissement des graphiques */
+        #rate-chart-container {
+            height: 400px; /* Plus grand */
+        }
+
+        #rateCurveChart {
+            height: 500px; /* Surface 3D plus grande */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de chargement -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="spinner-container">
+            <div class="spinner-border" style="width: 3rem; height: 3rem; color: var(--bs-primary);" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <div class="spinner-text" id="loadingText">Chargement...</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Titre de l'application avec animation -->
+        <div class="app-title">
+            <i class="bi bi-graph-up"></i>
+            Vasicek Interest Rate Model
+        </div>
+
+        <div id="error-message" class="alert alert-danger mb-3" style="display:none;"></div>
+
+        <main role="main" class="pb-2">
+            <!-- Interface unifiée -->
+            <div class="unified-container">
+                <!-- Panneau de gauche -->
+                <div class="left-panel">
+                    <!-- Section paramètres du modèle -->
+                    <div class="card parameters-panel mb-3">
+                        <div class="card-header">
+                            <div class="section-title"><i class="bi bi-sliders"></i> Paramètres du modèle</div>
+                            <button class="collapse-btn" data-target="parameters-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="parameters-body">
+                            <form id="parameters-form">
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="mean-reversion" class="form-label">Vitesse de retour à la moyenne (α)</label>
+                                        <div class="input-group">
+                                            <input type="number" id="mean-reversion" name="meanReversion" class="form-control" step="0.01" min="0" max="5" value="0.1" />
+                                            <span class="input-group-text">an<sup>-1</sup></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="long-term-rate" class="form-label">Taux à long terme (θ)</label>
+                                        <div class="input-group">
+                                            <input type="number" id="long-term-rate" name="longTermRate" class="form-control" step="0.1" min="0" max="20" value="5.0" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="volatility" class="form-label">Volatilité (σ)</label>
+                                        <div class="input-group">
+                                            <input type="number" id="volatility" name="volatility" class="form-control" step="0.01" min="0" max="5" value="0.5" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="current-rate" class="form-label">Taux actuel (r₀)</label>
+                                        <div class="input-group">
+                                            <input type="number" id="current-rate" name="currentRate" class="form-control" step="0.1" min="0" max="20" value="3.0" />
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Section calibration -->
+                    <div class="card calibration-panel">
+                        <div class="card-header">
+                            <div class="section-title">
+                                <i class="bi bi-gear-wide-connected"></i> Calibration et simulation
+                            </div>
+                            <button class="collapse-btn" data-target="calibration-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="calibration-body">
+                            <form id="simulation-form">
+                                <div class="row form-row">
+                                    <div class="col-md-6">
+                                        <label for="time-horizon" class="form-label">Horizon temporel</label>
+                                        <div class="input-group">
+                                            <input type="number" id="time-horizon" name="timeHorizon" class="form-control" step="0.5" min="0.5" max="30" value="10" />
+                                            <span class="input-group-text">années</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="time-steps" class="form-label">Nombre d'étapes</label>
+                                        <div class="input-group">
+                                            <input type="number" id="time-steps" name="timeSteps" class="form-control" step="10" min="10" max="1000" value="120" />
+                                            <span class="input-group-text">pas</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <label for="simulation-paths" class="form-label">Nombre de simulations</label>
+                                    <input type="range" id="simulation-paths" name="simulationPaths" class="form-range" min="10" max="1000" step="10" value="100" />
+                                    <div class="d-flex justify-content-between">
+                                        <small>10</small>
+                                        <small id="simulation-value">100</small>
+                                        <small>1,000</small>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="show-confidence" name="showConfidence" checked>
+                                    <label class="form-check-label" for="show-confidence">Afficher les intervalles de confiance</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-calculate w-100 position-relative overflow-hidden">
+                                    <i class="bi bi-calculator me-1"></i>Calculer et simuler
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panneau de droite (résultats) -->
+                <div class="right-panel">
+                    <!-- Section résultats -->
+                    <div class="card results-panel">
+                        <div class="card-header">
+                            <div class="section-title">
+                                <i class="bi bi-bar-chart-fill"></i> Résultats et visualisations
+                            </div>
+                            <button class="collapse-btn" data-target="results-body">
+                                <i class="bi bi-chevron-up"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="results-body">
+                            <div id="no-results" class="nodata-message">
+                                <i class="bi bi-calculator"></i>
+                                <p>Configurez les paramètres et cliquez sur Calculer pour voir les résultats</p>
+                            </div>
+
+                            <div id="results-content" style="display: none;">
+                                <!-- Valeurs calculées -->
+                                <div class="unified-results">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Paramètres estimés</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="rate-display">
+                                                        <div class="rate-label">Taux à court terme</div>
+                                                        <div id="short-term-rate" class="rate-value short-term">--</div>
+                                                    </div>
+                                                    <div class="rate-display">
+                                                        <div class="rate-label">Taux à long terme</div>
+                                                        <div id="long-term-rate-display" class="rate-value long-term">--</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="rate-display">
+                                                        <div class="rate-label">Taux moyen</div>
+                                                        <div id="average-rate" class="rate-value current">--</div>
+                                                    </div>
+                                                    <!-- Volatilité réalisée supprimée comme demandé -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Paramètres du modèle -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Statistiques du modèle</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="parameter-card">
+                                                        <div class="parameter-label">Alpha (α)</div>
+                                                        <div id="alpha-value" class="parameter-value">--</div>
+                                                        <div class="parameter-description">Vitesse de retour à la moyenne</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="parameter-card">
+                                                        <div class="parameter-label">Theta (θ)</div>
+                                                        <div id="theta-value" class="parameter-value">--</div>
+                                                        <div class="parameter-description">Taux d'équilibre à long terme</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="parameter-card">
+                                                        <div class="parameter-label">Sigma (σ)</div>
+                                                        <div id="sigma-value" class="parameter-value">--</div>
+                                                        <div class="parameter-description">Volatilité du taux</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6 col-lg-3 mb-2">
+                                                    <div class="parameter-card">
+                                                        <div class="parameter-label">R₀</div>
+                                                        <div id="r0-value" class="parameter-value">--</div>
+                                                        <div class="parameter-description">Taux initial</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Visualisations - Format modifié pour maximiser l'espace -->
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Visualisations</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Nouvelle structure pour les visualisations -->
+                                            <div class="charts-container">
+                                                <!-- Graphique des trajectoires de taux -->
+                                                <div class="chart-wrapper">
+                                                    <h6>Trajectoires de taux simulées</h6>
+                                                    <div class="chart-container" id="rate-chart-container">
+                                                        <canvas id="rate-chart"></canvas>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Surface des taux 3D -->
+                                                <div class="chart-wrapper">
+                                                    <h6>Surface des taux dans le temps (3D)</h6>
+                                                    <div id="rateCurveChart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <div class="container text-center">
+            <div class="update-badge mx-auto d-inline-flex">
+                <i class="bi bi-clock-history icon"></i>
+                <span>Dernière mise à jour: <span class="timestamp">@currentDateTime</span> par <span class="user">@currentUser</span></span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Variables globales
+        let darkMode = localStorage.getItem('darkMode') === 'true'; // État initial du mode sombre
+        let charts = {}; // Pour stocker les références aux graphiques Chart.js
+
+        // Animation des éléments lors du chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            // Appliquer le mode sombre si nécessaire
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeToggle').innerHTML = '<i class="bi bi-sun"></i>';
+            }
+
+            // Initialisation des événements
+            initializeEvents();
+
+            // Initialiser le slider de simulations
+            const simulationSlider = document.getElementById('simulation-paths');
+            const simulationValue = document.getElementById('simulation-value');
+            simulationValue.textContent = simulationSlider.value;
+
+            simulationSlider.addEventListener('input', function() {
+                simulationValue.textContent = parseInt(this.value).toLocaleString();
+            });
+
+            // Activer le basculement du thème
+            document.getElementById('themeToggle') && document.getElementById('themeToggle').addEventListener('click', toggleDarkMode);
+
+            // Initialiser les boutons de repli des sections
+            initializeCollapseSections();
+
+            // Animation du titre de l'application
+            animateAppTitle();
+        });
+
+        // Animation du titre de l'application
+        function animateAppTitle() {
+            const appTitle = document.querySelector('.app-title');
+            if (appTitle) {
+                appTitle.style.opacity = '0';
+                appTitle.style.transform = 'translateY(-20px)';
+
+                setTimeout(() => {
+                    appTitle.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    appTitle.style.opacity = '1';
+                    appTitle.style.transform = 'translateY(0)';
+                }, 200);
+            }
+        }
+
+        // Fonction pour initialiser les boutons de repli
+        function initializeCollapseSections() {
+            document.querySelectorAll('.collapse-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement.style.display === 'none') {
+                        targetElement.style.display = 'block';
+                        this.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                    } else {
+                        targetElement.style.display = 'none';
+                        this.innerHTML = '<i class="bi bi-chevron-down"></i>';
+                    }
+                });
+            });
+        }
+
+        // Basculer le mode sombre
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark-mode');
+
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle) {
+                themeToggle.innerHTML = darkMode ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon"></i>';
+            }
+
+            // Sauvegarder la préférence
+            localStorage.setItem('darkMode', darkMode);
+
+            // Mettre à jour les graphiques si nécessaires
+            updateChartTheme();
+        }
+
+        // Mettre à jour le thème des graphiques
+        function updateChartTheme() {
+            Object.values(charts).forEach(chart => {
+                if (chart && typeof chart.update === 'function') {
+                    // Mettre à jour les couleurs du graphique selon le thème
+                    chart.options.scales.x.grid.color = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    chart.options.scales.y.grid.color = darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    chart.options.scales.x.ticks.color = darkMode ? '#e5e5e5' : '#333';
+                    chart.options.scales.y.ticks.color = darkMode ? '#e5e5e5' : '#333';
+                    chart.update();
+                }
+            });
+
+            // Mettre à jour Plotly 3D si présent
+            var rateCurveElement = document.getElementById('rateCurveChart');
+            if (rateCurveElement && rateCurveElement.data) {
+                var paperColor = darkMode ? '#1a2530' : '#ffffff';
+                var textColor = darkMode ? '#e5e5e5' : '#333333';
+
+                Plotly.relayout(rateCurveElement, {
+                    'paper_bgcolor': paperColor,
+                    'plot_bgcolor': paperColor,
+                    'font.color': textColor,
+                    'scene.xaxis.color': textColor,
+                    'scene.yaxis.color': textColor,
+                    'scene.zaxis.color': textColor
+                });
+            }
+        }
+
+        // Initialisation des événements
+        function initializeEvents() {
+            // Formulaire de simulation
+            document.getElementById('simulation-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                simulateRates();
+            });
+        }
+
+        // Affichage des messages d'erreur
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+
+            // Scroll vers le message d'erreur
+            errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Affichage du chargement
+        function showLoading(message = 'Chargement...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+
+        // Simulation des taux
+        function simulateRates() {
+            // Collecter les paramètres du formulaire
+            const meanReversion = parseFloat(document.getElementById('mean-reversion').value);
+            const longTermRate = parseFloat(document.getElementById('long-term-rate').value);
+            const volatility = parseFloat(document.getElementById('volatility').value);
+            const currentRate = parseFloat(document.getElementById('current-rate').value);
+            const timeHorizon = parseFloat(document.getElementById('time-horizon').value);
+            const timeSteps = parseInt(document.getElementById('time-steps').value);
+            const simulationPaths = parseInt(document.getElementById('simulation-paths').value);
+            const showConfidence = document.getElementById('show-confidence').checked;
+
+            // Validation des paramètres
+            if (isNaN(meanReversion) || meanReversion <= 0) {
+                showError('La vitesse de retour à la moyenne doit être un nombre positif');
+                return;
+            }
+            if (isNaN(longTermRate) || longTermRate < 0) {
+                showError('Le taux à long terme doit être un nombre positif ou nul');
+                return;
+            }
+            if (isNaN(volatility) || volatility <= 0) {
+                showError('La volatilité doit être un nombre positif');
+                return;
+            }
+            if (isNaN(currentRate) || currentRate < 0) {
+                showError('Le taux actuel doit être un nombre positif ou nul');
+                return;
+            }
+
+            showLoading('Simulation des trajectoires de taux...');
+
+            // Dans un environnement réel, on ferait un appel API ici
+            // Pour l'exemple, on simule la réponse avec un timeout
+            setTimeout(() => {
+                // Simuler les résultats du modèle Vasicek
+                const results = simulateVasicekModel(
+                    meanReversion,
+                    longTermRate,
+                    volatility,
+                    currentRate,
+                    timeHorizon,
+                    timeSteps,
+                    simulationPaths
+                );
+
+                hideLoading();
+
+                // Masquer le message "pas de résultats" et afficher la section de résultats
+                document.getElementById('no-results').style.display = 'none';
+                document.getElementById('results-content').style.display = 'block';
+
+                // Afficher les résultats avec animation
+                displayResults(results);
+
+                // Créer les graphiques
+                createCharts(results, showConfidence);
+
+            }, 1500); // Simulation d'un délai de traitement
+        }
+
+        // Simulation du modèle Vasicek (version simplifiée pour la démonstration)
+        function simulateVasicekModel(alpha, theta, sigma, r0, timeHorizon, timeSteps, paths) {
+            // Convertir les pourcentages en décimal
+            theta = theta / 100;
+            sigma = sigma / 100;
+            r0 = r0 / 100;
+
+            const dt = timeHorizon / timeSteps;
+            const sqrtDt = Math.sqrt(dt);
+
+            // Initialiser les tableaux de temps et de taux
+            const times = Array.from({length: timeSteps + 1}, (_, i) => i * dt);
+            const rates = Array(paths).fill().map(() => Array(timeSteps + 1).fill(0));
+
+            // Initialiser tous les chemins avec le taux initial
+            for (let p = 0; p < paths; p++) {
+                rates[p][0] = r0;
+            }
+
+            // Simuler les trajectoires
+            for (let p = 0; p < paths; p++) {
+                for (let t = 1; t <= timeSteps; t++) {
+                    // Générer un nombre aléatoire normal
+                    let z = randomNormal();
+
+                    // Appliquer le modèle Vasicek (discrétisé)
+                    rates[p][t] = rates[p][t-1] + alpha * (theta - rates[p][t-1]) * dt + sigma * sqrtDt * z;
+
+                    // S'assurer que le taux reste positif (pour simplifier)
+                    rates[p][t] = Math.max(0, rates[p][t]);
+                }
+            }
+
+            // Calculer la trajectoire moyenne
+            const meanRates = Array(timeSteps + 1).fill(0);
+            for (let t = 0; t <= timeSteps; t++) {
+                let sum = 0;
+                for (let p = 0; p < paths; p++) {
+                    sum += rates[p][t];
+                }
+                meanRates[t] = sum / paths;
+            }
+
+            // Calculer les bornes de l'intervalle de confiance à 95%
+            const confidenceLower = Array(timeSteps + 1).fill(0);
+            const confidenceUpper = Array(timeSteps + 1).fill(0);
+
+            for (let t = 0; t <= timeSteps; t++) {
+                const ratesAtT = rates.map(r => r[t]);
+                ratesAtT.sort((a, b) => a - b);
+
+                confidenceLower[t] = ratesAtT[Math.floor(paths * 0.025)];
+                confidenceUpper[t] = ratesAtT[Math.floor(paths * 0.975)];
+            }
+
+            // Calculer des statistiques sur le taux à la fin de la simulation
+            const finalRates = rates.map(r => r[timeSteps]);
+            const shortTermRate = finalRates.reduce((sum, r) => sum + r, 0) / paths;
+            const realizedVol = Math.sqrt(finalRates.reduce((sum, r) => sum + Math.pow(r - shortTermRate, 2), 0) / paths);
+
+            // Calculer la courbe des taux zéro-coupon
+            const yieldCurve = calculateYieldCurve(alpha, theta, sigma, r0, timeHorizon, 20);
+
+            return {
+                times,
+                rates,
+                meanRates,
+                confidenceLower,
+                confidenceUpper,
+                shortTermRate,
+                longTermRate: theta,
+                averageRate: meanRates.reduce((sum, r) => sum + r, 0) / (timeSteps + 1),
+                realizedVolatility: realizedVol,
+                alpha,
+                theta,
+                sigma,
+                r0,
+                yieldCurve
+            };
+        }
+
+        // Fonction pour générer un nombre aléatoire normal (Box-Muller)
+        function randomNormal() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        // Calculer la courbe des taux zéro-coupon
+        function calculateYieldCurve(alpha, theta, sigma, r0, maxT, points) {
+            const maturities = [];
+            const yields = [];
+
+            // Convertir en décimal
+            theta = theta / 100;
+            sigma = sigma / 100;
+            r0 = r0 / 100;
+
+            for (let i = 0; i <= points; i++) {
+                const T = (i / points) * maxT;
+                maturities.push(T);
+
+                // Formule du taux zéro-coupon selon Vasicek
+                if (T === 0) {
+                    yields.push(r0 * 100); // Convertir en pourcentage
+                    continue;
+                }
+
+                const B = (1 - Math.exp(-alpha * T)) / alpha;
+                const A = Math.exp((theta - (sigma * sigma) / (2 * alpha * alpha)) * (B - T) - (sigma * sigma * B * B) / (4 * alpha));
+
+                const zcRate = -Math.log(A) / T + B * r0 / T;
+                yields.push(zcRate * 100); // Convertir en pourcentage
+            }
+
+            return { maturities, yields };
+        }
+
+        // Afficher les résultats
+        function displayResults(results) {
+            // Formater les valeurs en pourcentages avec 2 décimales
+            const formatPercent = (value) => (value * 100).toFixed(2) + '%';
+
+            // Mettre à jour les affichages avec animation
+            animateValue('short-term-rate', 0, results.shortTermRate * 100, '%');
+            animateValue('long-term-rate-display', 0, results.longTermRate * 100, '%');
+            animateValue('average-rate', 0, results.averageRate * 100, '%');
+            // Volatilité réalisée retirée
+
+            // Mettre à jour les paramètres du modèle
+            animateValue('alpha-value', 0, results.alpha, '');
+            animateValue('theta-value', 0, results.theta * 100, '%');
+            animateValue('sigma-value', 0, results.sigma * 100, '%');
+            animateValue('r0-value', 0, results.r0 * 100, '%');
+        }
+
+        // Animation pour l'affichage des valeurs
+        function animateValue(elementId, start, end, suffix = '') {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            const duration = 1000; // 1 seconde
+            const startTime = performance.now();
+
+            function updateValue(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+
+                // Fonction d'easing
+                const easeOutQuad = progress * (2 - progress);
+                const value = start + (end - start) * easeOutQuad;
+
+                element.textContent = value.toFixed(2) + suffix;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateValue);
+                } else {
+                    // Ajouter un petit effet de rebond à la fin
+                    element.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        element.style.transition = 'transform 0.2s ease-out';
+                        element.style.transform = 'scale(1)';
+                    }, 50);
+                }
+            }
+
+            requestAnimationFrame(updateValue);
+        }
+
+        // Créer les graphiques - Version simplifiée pour n'afficher que les graphiques demandés
+        function createCharts(results, showConfidence) {
+            // Détruire les graphiques existants s'ils existent
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+
+            // Configuration commune pour tous les graphiques
+            const chartConfig = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: darkMode ? '#2c3e50' : 'white',
+                        titleColor: darkMode ? '#ecf0f1' : '#2c3e50',
+                        bodyColor: darkMode ? '#ecf0f1' : '#2c3e50',
+                        borderColor: darkMode ? '#1a2530' : '#e9ecef',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        },
+                        ticks: {
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    }
+                }
+            };
+
+            // 1. Graphique des trajectoires de taux
+            const rateCtx = document.getElementById('rate-chart').getContext('2d');
+
+            // Convertir les taux en pourcentage pour l'affichage
+            const meanRatesPercent = results.meanRates.map(r => r * 100);
+            const confLowerPercent = results.confidenceLower.map(r => r * 100);
+            const confUpperPercent = results.confidenceUpper.map(r => r * 100);
+
+            // Sélectionner quelques trajectoires à afficher (pour ne pas surcharger le graphique)
+            const samplesToShow = 5;
+            const sampleRates = [];
+
+            for (let i = 0; i < samplesToShow; i++) {
+                const index = Math.floor(Math.random() * results.rates.length);
+                sampleRates.push(results.rates[index].map(r => r * 100));
+            }
+
+            const rateData = {
+                labels: results.times.map(t => t.toFixed(1) + ' ans'),
+                datasets: [
+                    {
+                        label: 'Taux moyen',
+                        data: meanRatesPercent,
+                        borderColor: '#6b46c1',
+                        backgroundColor: 'rgba(107, 70, 193, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.3,
+                        fill: false
+                    }
+                ]
+            };
+
+            // Ajouter les intervalles de confiance si demandé
+            if (showConfidence) {
+                rateData.datasets.push({
+                    label: 'Intervalle de confiance 95%',
+                    data: confLowerPercent,
+                    borderColor: 'rgba(107, 70, 193, 0.3)',
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: '+1'
+                });
+
+                rateData.datasets.push({
+                    label: 'Intervalle de confiance 95%',
+                    data: confUpperPercent,
+                    borderColor: 'rgba(107, 70, 193, 0.3)',
+                    backgroundColor: 'rgba(107, 70, 193, 0.1)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: '-1'
+                });
+            }
+
+            // Ajouter quelques trajectoires individuelles
+           
+
+            charts.rate = new Chart(rateCtx, {
+                type: 'line',
+                data: rateData,
+                options: {
+                    ...chartConfig,
+                    plugins: {
+                        ...chartConfig.plugins,
+                        title: {
+                            display: true,
+                            text: 'Trajectoires de taux simulées',
+                            color: darkMode ? '#e5e5e5' : '#333'
+                        }
+                    },
+                    scales: {
+                        ...chartConfig.scales,
+                        y: {
+                            ...chartConfig.scales.y,
+                            title: {
+                                display: true,
+                                text: 'Taux (%)',
+                                color: darkMode ? '#e5e5e5' : '#333'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Surface des taux 3D - agrandi pour occuper plus d'espace
+            createRateSurface(results);
+        }
+
+        // Créer la surface des taux 3D
+        function createRateSurface(results) {
+            // Préparation des données pour la surface 3D
+            const timeValues = results.times;
+            const xValues = []; // Temps
+            const yValues = []; // Maturités
+            const zValues = []; // Taux
+
+            // Générer les maturités (de 0 à 10 ans par pas de 0.5)
+            const maturities = [];
+            for (let i = 0; i <= 20; i++) {
+                maturities.push(i * 0.5);
+            }
+
+            // Pour chaque point temporel
+            for (let t = 0; t < timeValues.length; t += 5) { // Par pas de 5 pour ne pas surcharger
+                const time = timeValues[t];
+
+                // Pour chaque maturité
+                for (const maturity of maturities) {
+                    // Ajouter les coordonnées
+                    xValues.push(time);
+                    yValues.push(maturity);
+
+                    // Calculer le taux correspondant (formule simplifiée pour la démo)
+                    const rate = calculateRateAtTimeAndMaturity(
+                        results.alpha,
+                        results.theta,
+                        results.sigma,
+                        results.meanRates[t],
+                        maturity
+                    );
+
+                    zValues.push(rate * 100); // Convertir en pourcentage
+                }
+            }
+
+            // Configuration de la surface 3D - Agrandie
+            const data = [{
+                type: 'mesh3d',
+                x: xValues,
+                y: yValues,
+                z: zValues,
+                intensity: zValues,
+                colorscale: 'Jet',
+                opacity: 0.8
+            }];
+
+            const layout = {
+                title: 'Surface des taux',
+                scene: {
+                    xaxis: {title: 'Temps (années)'},
+                    yaxis: {title: 'Maturité (années)'},
+                    zaxis: {title: 'Taux (%)'}
+                },
+                margin: {l: 0, r: 0, b: 0, t: 50},
+                paper_bgcolor: darkMode ? '#1a2530' : '#ffffff',
+                plot_bgcolor: darkMode ? '#1a2530' : '#ffffff',
+                font: {
+                    color: darkMode ? '#e5e5e5' : '#333333'
+                },
+                autosize: true // Permettre le redimensionnement automatique
+            };
+
+            // Créer ou mettre à jour le graphique Plotly
+            Plotly.newPlot('rateCurveChart', data, layout, {responsive: true});
+
+            // Redimensionner pour occuper tout l'espace disponible
+            setTimeout(() => {
+                Plotly.relayout('rateCurveChart', {});
+            }, 100);
+        }
+
+        // Fonction pour calculer le taux à un temps et une maturité donnés
+        function calculateRateAtTimeAndMaturity(alpha, theta, sigma, currentRate, maturity) {
+            // Formule simplifiée pour la démonstration
+            if (maturity === 0) return currentRate;
+
+            // Décroissance exponentielle du taux à court terme vers le taux à long terme
+            const weight = Math.exp(-alpha * maturity);
+            let rate = currentRate * weight + theta * (1 - weight);
+
+                       // Ajouter un terme de volatilité qui augmente avec la maturité
+            rate += (sigma * Math.sqrt(maturity) * (Math.random() - 0.5) * 0.2);
+
+            return Math.max(0, rate); // Ne pas permettre de taux négatifs
+        }
+
+        // Générer une couleur aléatoire avec opacité
+        function getRandomColor(alpha = 1) {
+            const r = Math.floor(Math.random() * 256);
+            const g = Math.floor(Math.random() * 256);
+            const b = Math.floor(Math.random() * 256);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // Optimisations pour les appareils mobiles
+        function setupMobileOptimizations() {
+            // Vérifier si l'appareil est mobile (écran < 768px)
+            const isMobile = window.innerWidth < 768;
+
+            if (isMobile) {
+                // Ajuster la taille des graphiques
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.style.height = '250px';
+                });
+
+                // Simplifier l'interface
+                document.querySelectorAll('.parameter-description').forEach(desc => {
+                    desc.style.display = 'none';
+                });
+
+                // Adapter la grille unifiée pour mobile
+                document.querySelector('.unified-container').style.display = 'block';
+            }
+        }
+
+        // Appeler l'optimisation pour mobiles au chargement et au redimensionnement
+        window.addEventListener('load', setupMobileOptimizations);
+        window.addEventListener('resize', setupMobileOptimizations);
+
+        // Mise à jour des informations de date et utilisateur
+        function updateTimestampAndUser() {
+            const timestampElements = document.querySelectorAll('.timestamp');
+            const userElements = document.querySelectorAll('.user');
+
+            timestampElements.forEach(el => {
+                el.textContent = '2025-05-01 10:58:00';
+            });
+
+            userElements.forEach(el => {
+                el.textContent = 'hajji-achraf';
+            });
+        }
+
+        // Appeler la mise à jour au chargement
+        window.addEventListener('load', updateTimestampAndUser);
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+﻿/* Styles personnalisés pour l'application Vasicek */
+
+:root {
+    --blue: #4e73df;
+    --primary: #4e73df;
+    --success: #1cc88a;
+    --info: #36b9cc;
+    --warning: #f6c23e;
+    --danger: #e74a3b;
+}
+
+body {
+    background-color: #f8f9fc;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.shadow {
+    box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15) !important;
+}
+
+.card {
+    position: relative;
+    margin-bottom: 1.5rem;
+    border: 0 !important;
+    border-radius: .35rem;
+}
+
+.card-header {
+    padding: .75rem 1.25rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+    .btn-primary:hover {
+        background-color: #2e59d9;
+        border-color: #2653d4;
+    }
+
+.btn-info {
+    color: #fff;
+    background-color: var(--info);
+    border-color: var(--info);
+}
+
+    .btn-info:hover {
+        background-color: #2c9faf;
+        border-color: #2a96a5;
+    }
+
+.form-control:focus {
+    color: #6e707e;
+    background-color: #fff;
+    border-color: #bac8f3;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(78,115,223,.25);
+}
+
+.text-xs {
+    font-size: .7rem;
+}
+
+.text-success {
+    color: var(--success) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.table-bordered {
+    border: 1px solid #e3e6f0;
+}
+
+    .table-bordered th,
+    .table-bordered td {
+        border: 1px solid #e3e6f0;
+    }
+
+.card-body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+/* Animation pour les mises à jour */
+@keyframes highlight {
+    0% {
+        background-color: rgba(78,115,223,.1);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.highlight {
+    animation: highlight 1s;
+}

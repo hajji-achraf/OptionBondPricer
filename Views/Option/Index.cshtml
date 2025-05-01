@@ -1,0 +1,707 @@
+﻿@{
+    ViewData["Title"] = "Pricing Options";
+    Layout = "_Layout";
+    string currentDateTime = "2025-04-29 15:52:26";
+    string currentUser = "hajji-achraf";
+}
+
+<!-- Importation de Animate.css pour des animations simples -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<div class="model-selection-container">
+    <div class="hero-section">
+        <h1 class="main-title animate__animated animate__fadeIn">Pricing Options</h1>
+        <p class="subtitle animate__animated animate__fadeIn animate__delay-1s">Choisissez votre modèle de pricing</p>
+    </div>
+
+    <!-- Ajout d'un simple bouton de comparaison -->
+    <div class="compare-button-container">
+        <button id="compareModelsBtn" class="compare-button animate__animated animate__fadeIn animate__delay-2s">
+            <span class="compare-icon">⊕</span> Comparer les modèles
+        </button>
+    </div>
+
+    <!-- Panel de comparaison simple -->
+    <div id="comparePanel" class="compare-panel">
+        <div class="comparison-header">
+            <h3>Comparaison des modèles</h3>
+            <button class="close-btn">×</button>
+        </div>
+        <div class="comparison-content">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Caractéristique</th>
+                        <th>Black-Scholes</th>
+                        <th>Heston</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Volatilité</td>
+                        <td>Constante</td>
+                        <td>Stochastique</td>
+                    </tr>
+                    <tr>
+                        <td>Complexité</td>
+                        <td>Faible</td>
+                        <td>Élevée</td>
+                    </tr>
+                    <tr>
+                        <td>Précision long-terme</td>
+                        <td>Moyenne</td>
+                        <td>Élevée</td>
+                    </tr>
+                    <tr>
+                        <td>Vitesse de calcul</td>
+                        <td>Rapide</td>
+                        <td>Plus lente</td>
+                    </tr>
+                    <tr>
+                        <td>Smile de volatilité</td>
+                        <td>Non</td>
+                        <td>Oui</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="model-buttons-container">
+        <a href="@Url.Action("BlackScholes", "Option")" class="model-button black-scholes-button">
+            <div class="button-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="14.31" y1="8" x2="20.05" y2="17.94"></line>
+                    <line x1="9.69" y1="8" x2="21.17" y2="8"></line>
+                    <line x1="7.38" y1="12" x2="13.12" y2="2.06"></line>
+                    <line x1="9.69" y1="16" x2="3.95" y2="6.06"></line>
+                    <line x1="14.31" y1="16" x2="2.83" y2="16"></line>
+                    <line x1="16.62" y1="12" x2="10.88" y2="21.94"></line>
+                </svg>
+                <h2>Modèle de Black-Scholes</h2>
+                <p>Modèle classique de pricing d'options avec volatilité constante</p>
+
+                <!-- Ajout d'un indicateur d'utilité simple -->
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Simplicité</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill" style="width: 90%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-list">
+                    <span class="feature-item">Volatilité constante</span>
+                    <span class="feature-item">Prix d'exercice fixe</span>
+                    <span class="feature-item">Taux d'intérêt constant</span>
+                    <span class="feature-item">Données réelles via API</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="@Url.Action("Heston", "Option")" class="model-button heston-button">
+            <div class="button-content">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 12h20"></path>
+                    <path d="M6 4v16"></path>
+                    <path d="M18 4v16"></path>
+                    <path d="M2 4h20"></path>
+                    <path d="M2 20h20"></path>
+                    <path d="M12 4v16"></path>
+                </svg>
+                <h2>Modèle de Heston</h2>
+                <p>Modèle avancé avec volatilité stochastique</p>
+
+                <!-- Ajout d'un indicateur d'utilité simple -->
+                <div class="model-stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Précision</div>
+                        <div class="stat-bar">
+                            <div class="stat-fill heston-fill" style="width: 95%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-list">
+                    <span class="feature-item">Volatilité stochastique</span>
+                    <span class="feature-item">Corrélation prix-volatilité</span>
+                    <span class="feature-item">Meilleure précision pour options long-terme</span>
+                    <span class="feature-item">Données réelles via API</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="info-section">
+        <div class="info-card">
+            <h3>À propos des modèles d'options</h3>
+            <p>
+                Les modèles de pricing d'options permettent d'estimer la valeur théorique des options financières.
+                Chaque modèle possède ses propres hypothèses et avantages pour différentes situations de marché.
+            </p>
+            <p>
+                Pour un pricing simple avec des paramètres constants, le modèle de Black-Scholes est idéal. Pour les marchés
+                plus volatils ou les options à long terme, le modèle de Heston offre une meilleure précision grâce à sa
+                modélisation de la volatilité stochastique.
+            </p>
+
+           
+
+            <p class="last-updated">
+                Dernière mise à jour: <span class="timestamp">@currentDateTime</span> par <span class="user">@currentUser</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --background-color: #f8f9fa;
+        --primary-color: #8E1616;
+        --secondary-color: #6b46c1;
+        --text-color: #333333;
+        --light-gray: #e5e5e5;
+        --gray: #e0e0e0;
+        --dark-gray: #888888;
+        --border-radius: 8px;
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --transition: all 0.2s ease;
+    }
+
+    body {
+        background-color: var(--background-color);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    }
+
+    .model-selection-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .hero-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .main-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.02em;
+        position: relative;
+        display: inline-block;
+    }
+
+        .main-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+            animation: expandWidth 1s ease-out 0.5s forwards;
+        }
+
+    @@keyframes expandWidth {
+        from
+
+    {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+
+    }
+
+    .subtitle {
+        font-size: 18px;
+        color: #888888;
+        margin-top: 20px;
+    }
+
+    /* Styles pour le bouton de comparaison */
+    .compare-button-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .compare-button {
+        display: flex;
+        align-items: center;
+        padding: 8px 16px;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        color: #555;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .compare-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+    .compare-icon {
+        margin-right: 8px;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    /* Styles pour le panel de comparaison */
+    .compare-panel {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+
+        .compare-panel.active {
+            max-height: 400px;
+        }
+
+    .comparison-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+        .comparison-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #888;
+    }
+
+    .comparison-content {
+        padding: 20px;
+    }
+
+    .comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .comparison-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .comparison-table td:nth-child(2) {
+            color: var(--primary-color);
+        }
+
+        .comparison-table td:nth-child(3) {
+            color: var(--secondary-color);
+        }
+
+    .model-buttons-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    @@media (min-width: 768px) {
+        .model-buttons-container
+
+    {
+        flex-direction: row;
+    }
+
+    }
+
+    .model-button {
+        display: flex;
+        background-color: white;
+        border-radius: 12px;
+        padding: 30px;
+        text-decoration: none;
+        color: #333333;
+        flex: 1;
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(20px);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .black-scholes-button {
+        animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    }
+
+    .heston-button {
+        animation: fadeInUp 0.8s ease-out 0.6s forwards;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .model-button::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 0;
+        transition: height 0.3s ease;
+    }
+
+    .black-scholes-button::before {
+        background-color: var(--primary-color);
+    }
+
+    .heston-button::before {
+        background-color: var(--secondary-color);
+    }
+
+    .model-button:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+        .model-button:hover::before {
+            height: 100%;
+        }
+
+    .black-scholes-button:hover {
+        border-color: var(--primary-color);
+    }
+
+    .heston-button:hover {
+        border-color: var(--secondary-color);
+    }
+
+    .button-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+        z-index: 1;
+    }
+
+        .button-content svg {
+            margin-bottom: 20px;
+            stroke: var(--primary-color);
+            width: 40px;
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+    .heston-button .button-content svg {
+        stroke: var(--secondary-color);
+    }
+
+    .model-button:hover .button-content svg {
+        transform: rotate(15deg) scale(1.1);
+    }
+
+    .button-content h2 {
+        margin: 0 0 12px 0;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .button-content p {
+        margin: 0 0 20px 0;
+        color: #666666;
+        font-size: 16px;
+    }
+
+    /* Styles pour les stats du modèle */
+    .model-stats {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .stat-item {
+        text-align: left;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    .stat-bar {
+        height: 6px;
+        background-color: #eee;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .stat-fill {
+        height: 100%;
+        background-color: var(--primary-color);
+        border-radius: 3px;
+        width: 0;
+        transition: width 1s ease;
+    }
+
+    .heston-fill {
+        background-color: var(--secondary-color);
+    }
+
+    .features-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .feature-item {
+        font-size: 14px;
+        background-color: #f1f5f9;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.2s ease;
+    }
+
+    .black-scholes-button:hover .feature-item {
+        border-color: var(--primary-color);
+        background-color: rgba(0, 112, 243, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .heston-button:hover .feature-item {
+        border-color: var(--secondary-color);
+        background-color: rgba(107, 70, 193, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .info-section {
+        margin-top: 60px;
+        opacity: 0;
+        animation: fadeIn 0.8s ease-out 0.9s forwards;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    .info-card {
+        background-color: white;
+        border-radius: 12px;
+        padding: 24px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+        .info-card h3 {
+            margin-top: 0;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .info-card p {
+            margin-bottom: 16px;
+            line-height: 1.7;
+            color: #555;
+        }
+
+    /* Styles pour le conseil utilisateur */
+    .user-tip {
+        display: flex;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+        border-left: 3px solid var(--primary-color);
+    }
+
+    .tip-icon {
+        font-size: 20px;
+        margin-right: 15px;
+    }
+
+    .tip-content {
+        font-size: 15px;
+        color: #555;
+        line-height: 1.5;
+    }
+
+    .last-updated {
+        font-size: 14px;
+        color: #888;
+        text-align: right;
+        margin-bottom: 0;
+        border-top: 1px solid #e0e0e0;
+        padding-top: 16px;
+        margin-top: 24px;
+    }
+
+    .timestamp, .user {
+        font-weight: 500;
+        color: var(--primary-color);
+    }
+
+    /* Effet de surbrillance sur les features */
+    .feature-item {
+        position: relative;
+        overflow: hidden;
+    }
+
+        .feature-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.7s;
+        }
+
+    .model-button:hover .feature-item::before {
+        left: 100%;
+    }
+
+    /* Animation pulse pour les SVG */
+    @@keyframes pulse {
+        0%
+
+    {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
+    }
+
+    .button-content svg {
+        animation: pulse 3s infinite;
+    }
+
+    .heston-button .button-content svg {
+        animation-delay: 1s;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des barres de statistiques
+        setTimeout(() => {
+            const statFills = document.querySelectorAll('.stat-fill');
+            statFills.forEach(fill => {
+                const width = fill.style.width;
+                fill.style.width = '0';
+                setTimeout(() => {
+                    fill.style.width = width;
+                }, 100);
+            });
+        }, 1000);
+
+        // Animation pour les caractéristiques avec délai progressif
+        const blackScholesFeatures = document.querySelectorAll('.black-scholes-button .feature-item');
+        const hestonFeatures = document.querySelectorAll('.heston-button .feature-item');
+
+        function animateFeatures(features, baseDelay) {
+            features.forEach((feature, index) => {
+                feature.style.opacity = '0';
+                feature.style.transform = 'translateY(10px)';
+
+                setTimeout(() => {
+                    feature.style.transition = 'all 0.5s ease';
+                    feature.style.opacity = '1';
+                    feature.style.transform = 'translateY(0)';
+                }, baseDelay + (index * 100));
+            });
+        }
+
+        setTimeout(() => {
+            animateFeatures(blackScholesFeatures, 500);
+            animateFeatures(hestonFeatures, 800);
+        }, 300);
+
+        // Gestion du panel de comparaison
+        const compareBtn = document.getElementById('compareModelsBtn');
+        const comparePanel = document.getElementById('comparePanel');
+        const closeBtn = document.querySelector('.close-btn');
+
+        compareBtn.addEventListener('click', function() {
+            comparePanel.classList.toggle('active');
+        });
+
+        closeBtn.addEventListener('click', function() {
+            comparePanel.classList.remove('active');
+        });
+
+        // Effet de survol élégant pour les cartes
+        const modelButtons = document.querySelectorAll('.model-button');
+        modelButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+                this.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.1)';
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
+            });
+        });
+    });
+</script>
