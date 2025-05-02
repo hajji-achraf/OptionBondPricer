@@ -1,9 +1,5 @@
-# 📊 Finance Quantitative - Valorisation d'Options et Obligations
+ Valorisation d'Options et Obligations
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![Licence](https://img.shields.io/badge/licence-MIT-green.svg)
-![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-7.0-purple.svg)
-![C#](https://img.shields.io/badge/C%23-10.0-brightgreen.svg)
 
 Une application web interactive pour la valorisation d'instruments financiers dérivés, implémentant des modèles mathématiques avancés comme Black-Scholes, Heston, Vasicek et Hull-White.
 
